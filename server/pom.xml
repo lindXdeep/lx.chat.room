@@ -17,9 +17,32 @@
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
 
-    <main.class>lx.lindx.talx.App</main.class>
+    <main.class>lx.lindx.talx.server.App</main.class>
   </properties>
 
   <name>TalX</name>
   <url>https://github.com/lindXdeep/lx.talx</url>
+
+  
+<build>
+  <plugins>
+     <plugin>
+        <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>${main.class}</mainClass>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+  </plugins>
+</build>
 </project>

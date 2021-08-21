@@ -17,7 +17,7 @@
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
 
-    <main.class>lx.lindx.talx.App</main.class>
+    <main.class>lx.lindx.talx.client.App</main.class>
   </properties>
 
   <name>TalX</name>
