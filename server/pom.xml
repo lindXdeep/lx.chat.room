@@ -20,7 +20,7 @@
     <main.class>lx.lindx.talx.server.App</main.class>
   </properties>
 
-  <name>TalX</name>
+  <name>TalX-Server</name>
   <url>https://github.com/lindXdeep/lx.talx</url>
 
   
