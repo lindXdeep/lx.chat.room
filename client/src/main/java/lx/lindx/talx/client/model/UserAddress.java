@@ -1,4 +1,4 @@
-package lx.lindx.talx.client.net;
+package lx.lindx.talx.client.model;
 
 public class UserAddress {
   private final String host;

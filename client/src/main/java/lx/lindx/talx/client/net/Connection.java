@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import lx.lindx.talx.client.model.UserAddress;
+
 public class Connection extends Thread {
 
   private byte[] buffer;
@@ -15,7 +17,7 @@ public class Connection extends Thread {
   private DataInputStream in;
   private DataOutputStream out;
 
-  public Connection(UserAddress addr, Client client) throws IOException {
+  public Connection(UserAddress addr, InetService client) throws IOException {
     socket = new Socket(addr.getHost(), addr.getPort());
     in = new DataInputStream(socket.getInputStream());
     out = new DataOutputStream(socket.getOutputStream());
@@ -30,7 +32,7 @@ public class Connection extends Thread {
       try {
 
         in.read(buffer);
-        Client.receive(new String(buffer, 0, buffer.length));
+        InetService.receive(new String(buffer, 0, buffer.length));
 
       } catch (IOException e) {
         e.printStackTrace();
@@ -40,13 +42,11 @@ public class Connection extends Thread {
   }
 
   public void sendMsg(String str) {
-    
+
     try {
       out.write(str.getBytes());
     } catch (IOException e) {
       e.printStackTrace();
     }
-
   }
-
 }
