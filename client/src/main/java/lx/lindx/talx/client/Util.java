@@ -1,5 +1,6 @@
 package lx.lindx.talx.client;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public class Util {
@@ -36,13 +37,6 @@ public class Util {
     toConsole(logo);
   }
 
-  private static void toConsole(String[] arr) {
-
-    for (String s : arr) {
-      System.out.print(s + " ");
-    }
-  }
-
   public static void printError(String[] param) {
 
     StringBuilder sb = new StringBuilder();
@@ -58,7 +52,25 @@ public class Util {
     System.out.println(sb.toString());
 
     printHelp();
-
   }
 
+  private static void toConsole(String[] arr) {
+    for (String s : arr) {
+      System.out.print(s + " ");
+    }
+  }
+
+  public static void toConsole(String msg) {
+    System.out.println("\n".concat(msg).concat("\n"));
+  }
+
+  public static void toConsole(String msg, IOException e) {
+    System.out.println(msg + e.getMessage() );
+  }
+
+  public static void error(IOException e) {
+    if (e.getMessage().equals("Connection refused")) {
+      System.out.println("Error: ".concat(e.getMessage()).concat(" because, Server is not available.\n") );
+    }
+  }
 }

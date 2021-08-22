@@ -1,15 +1,11 @@
 package lx.lindx.talx.server;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.Buffer;
+
+import lx.lindx.talx.server.error.ClientSocketExceprion;
 
 public class Connectrion extends Thread {
 
@@ -44,34 +40,41 @@ public class Connectrion extends Thread {
   }
 
   private void menu() {
+    try {
 
-    sendMsg(Util.getLogo());
-    sendMsg(Util.getInstruction());
-    
-    while (true) {
-      
-      sendCursor(10); // data will be in buffer
-      System.out.println(new String(buffer, 0, buffer.length));
+      sendMsg(Util.getLogo());
+      sendMsg(Util.getInstruction());
+
+      while (true) {
+
+        sendCursor(10); // data will be in buffer
+
+        System.out.println(new String(buffer, 0, buffer.length));
+      }
+
+    } catch (ClientSocketExceprion e) {
+      Util.log(e.getMessage());
     }
   }
 
-  private void sendCursor(int bufferSize) {
+  private void sendCursor(int bufferSize) throws ClientSocketExceprion {
     sendMsg("\n\n > ");
     buffer = new byte[bufferSize];
     try {
       in.read(buffer);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new ClientSocketExceprion(
+          "Client" + Util.getAddress(client) + "-/-> Server:[" + server.getPort() + "] ::: Connection reset");
     }
   }
 
-  private void sendMsg(String msg) {
-
+  private void sendMsg(String msg) throws ClientSocketExceprion {
     try {
       out.write(msg.getBytes());
       out.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
+    }catch(IOException e){
+      throw new ClientSocketExceprion(
+          "Can't write, because connection with" + Util.getAddress(client) + "has already closed it");
     }
   }
 }

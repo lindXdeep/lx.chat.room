@@ -1,21 +1,62 @@
 package lx.lindx.talx.client;
 
+import java.util.Scanner;
+
+import lx.lindx.talx.client.net.Client;
+import lx.lindx.talx.client.net.IMessageProcessor;
+import lx.lindx.talx.client.net.UserAddress;
+
 /**
  * App
  */
 public class App {
 
-  private static String PORT = "8181";
-  private static String address = "127.0.0.1";
   private static Client client;
-  private static boolean acceptConnect;
+  private static Scanner sc = new Scanner(System.in);
 
   public static void main(String... param) {
 
+    if (runMenu(param)) {
+
+      client.connect(new IMessageProcessor() {
+        @Override
+        public void processMessage(String message) {
+          parseMessage(message);
+        }
+      });
+
+      String str = new String();
+
+      while (true) {
+
+        while (sc.hasNext()) {
+          str = sc.nextLine();
+          
+          client.sendMsg(str);
+        }
+      }
+    }
+  }
+
+  private static void parseMessage(String message) {
+    System.out.println(message);
+  }
+
+  /**
+   * 
+   * 
+   * 
+   * Run menu
+   * 
+   * @param param
+   * @return
+   */
+  public static boolean runMenu(String... param) {
+
     if (param.length == 0) {
 
-      client = new Client(address, PORT);
-      acceptConnect = true;
+      client = new Client();
+      return true;
 
     } else if (param.length == 1 && param[0].equals("--help") || param[0].equals("-h")) {
 
@@ -27,15 +68,12 @@ public class App {
 
     } else if (param.length == 3 && (param[0].equals("--connect") || param[0].equals("-c"))) {
 
-      client = new Client(param[1], param[2]);
-      acceptConnect = true;
+      client = new Client(new UserAddress(param[1], Integer.valueOf(param[2])));
+      return true;
 
     } else {
       Util.printError(param);
     }
-
-    if (acceptConnect) {
-      client.start();
-    }
+    return false;
   }
 }

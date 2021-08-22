@@ -29,4 +29,8 @@ public class Server {
     });
     thread.start();
   }
+
+  public String getPort() {
+    return Integer.toString(PORT);
+  }
 }
