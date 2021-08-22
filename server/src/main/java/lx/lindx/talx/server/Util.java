@@ -54,6 +54,6 @@ public class Util {
   }
 
   public static String getInstruction() {
-    return "\n\n Use command \"/help\" for more information about a command.";
+    return "\n\n Use command \"/help\" for more information about a command.\n";
   }
 }

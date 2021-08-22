@@ -1,8 +1,12 @@
 package lx.lindx.talx.server;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 import lx.lindx.talx.server.error.ClientSocketExceprion;
@@ -18,7 +22,7 @@ public class Connectrion extends Thread {
 
   public Connectrion(Socket client, Server server) {
 
-    this.buffer = new byte[32];
+    this.buffer = new byte[1024];
 
     this.client = client;
     this.server = server;
@@ -47,7 +51,7 @@ public class Connectrion extends Thread {
 
       while (true) {
 
-        sendCursor(10); // data will be in buffer
+        sendCursor(); // data will be in buffer
 
         System.out.println(new String(buffer, 0, buffer.length));
       }
@@ -57,9 +61,12 @@ public class Connectrion extends Thread {
     }
   }
 
-  private void sendCursor(int bufferSize) throws ClientSocketExceprion {
-    sendMsg("\n\n > ");
-    buffer = new byte[bufferSize];
+  private void sendCursor() throws ClientSocketExceprion {
+
+    clearBuffer(1024);
+
+    sendMsg("\n > ");
+
     try {
       in.read(buffer);
     } catch (IOException e) {
@@ -69,12 +76,20 @@ public class Connectrion extends Thread {
   }
 
   private void sendMsg(String msg) throws ClientSocketExceprion {
+
     try {
       out.write(msg.getBytes());
       out.flush();
-    }catch(IOException e){
+    } catch (IOException e) {
       throw new ClientSocketExceprion(
           "Can't write, because connection with" + Util.getAddress(client) + "has already closed it");
     }
+  }
+
+  private void clearBuffer() {
+    buffer = new byte[1024];
+  }
+  private void clearBuffer(int size) {
+    buffer = new byte[size];
   }
 }

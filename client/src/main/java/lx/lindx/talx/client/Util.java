@@ -3,6 +3,9 @@ package lx.lindx.talx.client;
 import java.io.IOException;
 import java.util.Arrays;
 
+import lx.lindx.talx.client.model.UserAddress;
+import lx.lindx.talx.client.net.InetService;
+
 public class Util {
 
   public static void printHelp() {
@@ -65,12 +68,44 @@ public class Util {
   }
 
   public static void toConsole(String msg, IOException e) {
-    System.out.println(msg + e.getMessage() );
+    System.out.println(msg + e.getMessage());
   }
 
   public static void error(IOException e) {
     if (e.getMessage().equals("Connection refused")) {
-      System.out.println("Error: ".concat(e.getMessage()).concat(" because, Server is not available.\n") );
+      System.out.println("Error: ".concat(e.getMessage()).concat(" because, Server is not available.\n"));
     }
+  }
+
+  /**
+   * 
+   * 
+   * 
+   * Run menu
+   * 
+   * @param param
+   * @return
+   */
+  public static InetService getInetService(InetService client, String[] param) {
+    if (param.length == 0) {
+
+      return new InetService();
+
+    } else if (param.length == 1 && param[0].equals("--help") || param[0].equals("-h")) {
+
+      Util.printHelp();
+
+    } else if (param.length == 1 && param[0].equals("--about")) {
+
+      Util.printLogo();
+
+    } else if (param.length == 3 && (param[0].equals("--connect") || param[0].equals("-c"))) {
+
+      return new InetService(new UserAddress(param[1], Integer.valueOf(param[2])));
+
+    } else {
+      Util.printError(param);
+    }
+    throw new RuntimeException("Client service has finished work");
   }
 }
