@@ -35,7 +35,7 @@ public class App {
 
       while (sc.hasNext()) {
         client.send(sc.nextLine());
-   
+
       }
 
     }
