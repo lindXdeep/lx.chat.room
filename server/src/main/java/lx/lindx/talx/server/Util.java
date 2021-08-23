@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 public class Util {
 
+  private static final String ver = "ver-0.1";
+
   private static boolean chprnt;
 
   private static StringBuilder sb;
@@ -50,10 +52,42 @@ public class Util {
 
         "\t    |    |     | |_____ |    \\_ _/   \\_",
 
-        " > messenger < \n\n" });
+        " > messenger < \n\n", "\t\t\t".concat(Util.getVer()).concat("\n\n") });
+  }
+
+  private static String getVer() {
+    return ver;
   }
 
   public static String getInstruction() {
     return "\n\n Use command \"/help\" for more information about a command.\n";
+  }
+
+  public static String getHelp() {
+
+    return "\n"
+
+        .concat("/about         show info about messenger.\n")
+
+        .concat("/auth          sign in.\n")
+
+        .concat("/new           Create account.\n")
+
+        .concat("/end           Exit.\n");
+
+  }
+
+  public static void logCommand(Connectrion connectrion) {
+
+    byte[] buffer = connectrion.getBuffer();
+    Socket client = connectrion.getClient();
+
+    String command = new String(buffer, 0, buffer.length).trim();
+    String lengthCommand = String.valueOf(command.length());
+    String addr = client.getInetAddress().toString();
+    String port = String.valueOf(client.getPort());
+
+    Util.log(
+        addr.concat(":" + port).concat(" / msg size[").concat(lengthCommand).concat("] / command: ").concat(command));
   }
 }
