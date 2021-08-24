@@ -8,8 +8,11 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import lx.lindx.talx.server.error.ClientSocketExceprion;
+import lx.lindx.talx.server.security.Crypt;
 
 public class Connectrion extends Thread {
+
+  private Crypt crypt;
 
   private Socket client;
   private Server server;
@@ -38,8 +41,27 @@ public class Connectrion extends Thread {
   @Override
   public void run() {
 
-    menu();
+    Util.log("Waiting public key from client: " + Util.getAddress(client));
+    readNBytes(557);
+
+    crypt = new Crypt(buffer);
+    Util.log("Public key from" + Util.getAddress(client) + "received");
+
+    sendBytes(crypt.getPublicKeyEncoded());
+    Util.log("Public key sent to client:" + Util.getAddress(client));
+
+  
+    System.out.println("send AES");
+
+    try {
+      out.write(crypt.getKeyAES().getEncoded());
+      out.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     System.out.println("-----------end menu-----------");
+    // menu();
   }
 
   private void menu() {
@@ -120,12 +142,34 @@ public class Connectrion extends Thread {
     return new String(buffer, 0, buffer.length).trim();
   }
 
+  private void readNBytes(final int length) {
+
+    clearBuffer(length);
+
+    try {
+      in.read(buffer);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void sendBytes(final byte[] bytes) {
+    try {
+      out.write(bytes);
+      out.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Read message from cliet
+   * 
+   * @throws ClientSocketExceprion
+   */
   private void sendCursor() throws ClientSocketExceprion {
-
     clearBuffer();
-
     sendMsg("\n > ");
-
     try {
       in.read(buffer);
     } catch (IOException e) {
@@ -134,6 +178,12 @@ public class Connectrion extends Thread {
     }
   }
 
+  /**
+   * Send message to client
+   * 
+   * @param msg
+   * @throws ClientSocketExceprion
+   */
   private void sendMsg(String msg) throws ClientSocketExceprion {
 
     try {
