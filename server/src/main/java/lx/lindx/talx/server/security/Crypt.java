@@ -13,18 +13,22 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import lx.lindx.talx.server.Connectrion;
+import lx.lindx.talx.server.Util;
 
 public class Crypt {
 
-  private KeyPair keyPair;
+  private Connectrion connection;
 
+  private KeyPair keyPair;
   private SecretKeySpec keyAES;
 
-  public Crypt(final byte[] publicKeyClient) { // get Server Pub key Encoded
+  public Crypt(Connectrion connectrion) {
+    this.connection = connectrion;
+  }
 
-    // Generate our public key for client
+  private void setClientPubKey(byte[] publicKeyClient) { // Generate our public key for client
+
     try {
-
       PublicKey publicKey = KeyFactory.getInstance("DH").generatePublic(new X509EncodedKeySpec(publicKeyClient));
 
       DHParameterSpec dhParamFromServer = ((DHPublicKey) publicKey).getParams();
@@ -36,21 +40,16 @@ public class Crypt {
       generateSharedKey(publicKey);
 
     } catch (GeneralSecurityException e) {
-      e.printStackTrace();
+      Util.log("Connection from:" + Util.getAddress(connection.getClient()) + "rejected because public key is invalid");
+      connection
+          .sendBytes("Access denied: public key is invalid.".concat(Util.getIp(connection.getClient())).getBytes());
+      connection.kill();
     }
-  }
-
-  public Crypt(Connectrion connectrion) {
-  }
-
-  public byte[] getPublicKeyEncoded() {
-    return keyPair.getPublic().getEncoded();
   }
 
   private void generateSharedKey(PublicKey publicKey) {
 
     try {
-
       KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
       keyAgree.init(keyPair.getPrivate());
       keyAgree.doPhase(publicKey, true);
@@ -63,7 +62,27 @@ public class Crypt {
       e.printStackTrace();
     }
   }
-  
+
+  public void encryptConnection() {
+
+    Util.log("Waiting public key from client: " + Util.getAddress(connection.getClient()));
+    connection.readNBytes(557);
+
+    setClientPubKey(connection.getBuffer());
+
+    if (connection.getClient().isClosed()) {
+      return;
+    }
+
+    Util.log("Public key from" + Util.getAddress(connection.getClient()) + "received");
+
+    connection.sendBytes(keyPair.getPublic().getEncoded());
+    Util.log("Public key sent to client:" + Util.getAddress(connection.getClient()));
+
+    System.out.println("send AES");
+    connection.sendBytes(getKeyAES().getEncoded());
+  }
+
   public SecretKeySpec getKeyAES() {
     return keyAES;
   }

@@ -23,10 +23,20 @@ public class Util {
   public static String getAddress(Socket socket) {
 
     sb = new StringBuilder();
+
+    sb.append(getIp(socket));
+    sb.append("--> [PORT:");
+    sb.append(socket.getPort());
+    sb.append("] ");
+
+    return sb.toString();
+  }
+
+  public static String getIp(Socket socket) {
+
+    sb = new StringBuilder();
     sb.append(" [IP:");
     sb.append(socket.getLocalAddress());
-    sb.append("] --> [PORT:");
-    sb.append(socket.getPort());
     sb.append("] ");
 
     sb.deleteCharAt(5);
@@ -90,4 +100,5 @@ public class Util {
     Util.log(
         addr.concat(":" + port).concat(" / msg size[").concat(lengthCommand).concat("] / command: ").concat(command));
   }
+
 }

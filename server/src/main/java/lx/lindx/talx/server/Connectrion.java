@@ -24,6 +24,8 @@ public class Connectrion extends Thread {
 
   public Connectrion(Socket client, Server server) {
 
+    this.crypt = new Crypt(this);
+
     this.client = client;
     this.server = server;
 
@@ -41,24 +43,7 @@ public class Connectrion extends Thread {
   @Override
   public void run() {
 
-    Util.log("Waiting public key from client: " + Util.getAddress(client));
-    readNBytes(557);
-
-    crypt = new Crypt(buffer);
-    Util.log("Public key from" + Util.getAddress(client) + "received");
-
-    sendBytes(crypt.getPublicKeyEncoded());
-    Util.log("Public key sent to client:" + Util.getAddress(client));
-
-  
-    System.out.println("send AES");
-
-    try {
-      out.write(crypt.getKeyAES().getEncoded());
-      out.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    crypt.encryptConnection();
 
     System.out.println("-----------end menu-----------");
     // menu();
@@ -142,7 +127,7 @@ public class Connectrion extends Thread {
     return new String(buffer, 0, buffer.length).trim();
   }
 
-  private void readNBytes(final int length) {
+  public void readNBytes(final int length) {
 
     clearBuffer(length);
 
@@ -153,7 +138,7 @@ public class Connectrion extends Thread {
     }
   }
 
-  private void sendBytes(final byte[] bytes) {
+  public void sendBytes(final byte[] bytes) {
     try {
       out.write(bytes);
       out.flush();
@@ -184,7 +169,7 @@ public class Connectrion extends Thread {
    * @param msg
    * @throws ClientSocketExceprion
    */
-  private void sendMsg(String msg) throws ClientSocketExceprion {
+  public void sendMsg(String msg) throws ClientSocketExceprion {
 
     try {
       out.write(msg.getBytes());
@@ -209,5 +194,13 @@ public class Connectrion extends Thread {
 
   public byte[] getBuffer() {
     return this.buffer;
+  }
+
+  public void kill() {
+    try {
+      client.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
