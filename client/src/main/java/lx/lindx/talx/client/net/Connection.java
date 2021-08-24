@@ -23,7 +23,7 @@ public class Connection extends Thread {
 
   public Connection(UserAddress addr, InetService client) throws IOException {
 
-    crypt = new Crypt();
+    crypt = new Crypt(this);
 
     socket = new Socket(addr.getHost(), addr.getPort());
     in = new DataInputStream(socket.getInputStream());
@@ -33,15 +33,8 @@ public class Connection extends Thread {
   @Override
   public void run() {
 
-    Util.toConsole("Sending public key to server");
-    sendBytes(crypt.getPublicKeyEncoded());
+    crypt.encryptConnection();
 
-    readNBytes(557);
-    crypt.setServerPubKey(buffer);
-    Util.toConsole("Public key from server received");
-
-    readNBytes(16);
-    System.out.println(Arrays.equals(crypt.getKeyAES().getEncoded(), buffer));
 
     System.out.println("--------------------------end--------------------");
     return;
@@ -71,7 +64,7 @@ public class Connection extends Thread {
     buffer = new byte[size];
   }
 
-  private void readNBytes(final int length) {
+  public void readNBytes(final int length) {
 
     clearBuffer(length);
 
@@ -82,7 +75,7 @@ public class Connection extends Thread {
     }
   }
 
-  private void sendBytes(final byte[] bytes) {
+  public void sendBytes(final byte[] bytes) {
     try {
       out.write(bytes);
       out.flush();
@@ -98,5 +91,9 @@ public class Connection extends Thread {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public byte[] getBuffer() {
+    return buffer;
   }
 }

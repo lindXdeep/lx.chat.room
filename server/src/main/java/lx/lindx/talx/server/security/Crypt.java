@@ -12,6 +12,8 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import lx.lindx.talx.server.Connectrion;
+
 public class Crypt {
 
   private KeyPair keyPair;
@@ -36,6 +38,9 @@ public class Crypt {
     } catch (GeneralSecurityException e) {
       e.printStackTrace();
     }
+  }
+
+  public Crypt(Connectrion connectrion) {
   }
 
   public byte[] getPublicKeyEncoded() {

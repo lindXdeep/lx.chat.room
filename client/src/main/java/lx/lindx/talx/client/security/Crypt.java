@@ -6,9 +6,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.SecretKeySpec;
+
+import lx.lindx.talx.client.Util;
+import lx.lindx.talx.client.net.Connection;
 
 /**
  * Crypt module
@@ -18,10 +22,14 @@ public class Crypt {
   private KeyAgreement keyAgree;
 
   private byte[] pubkeyEncoded;
-  
+
   private SecretKeySpec keyAES;
 
-  public Crypt() {
+  private Connection connection;
+
+  public Crypt(Connection connection) {
+
+    this.connection = connection;
 
     try {
 
@@ -29,18 +37,11 @@ public class Crypt {
 
       keyAgree = KeyAgreement.getInstance("DH");
       keyAgree.init(keyPair.getPrivate());
-      
-      pubkeyEncoded = keyPair.getPublic().getEncoded();
-    } catch (
 
-    GeneralSecurityException e) {
+      pubkeyEncoded = keyPair.getPublic().getEncoded();
+    } catch (GeneralSecurityException e) {
       e.printStackTrace();
     }
-  }
-
-  // Publick key для отправки на сервер
-  public byte[] getPublicKeyEncoded() {
-    return pubkeyEncoded;
   }
 
   public void setServerPubKey(byte[] serverPubKey) {
@@ -63,5 +64,18 @@ public class Crypt {
 
   public SecretKeySpec getKeyAES() {
     return keyAES;
+  }
+
+  public void encryptConnection() {
+
+    Util.toConsole("Sending public key to server");
+    connection.sendBytes(pubkeyEncoded);
+
+    connection.readNBytes(557);
+    this.setServerPubKey(connection.getBuffer());
+    Util.toConsole("Public key from server received");
+
+    connection.readNBytes(16);
+    System.out.println(Arrays.equals(keyAES.getEncoded(), connection.getBuffer()));
   }
 }
