@@ -2,7 +2,6 @@ package lx.lindx.talx.client;
 
 import java.util.Scanner;
 
-import lx.lindx.talx.client.net.InetService;
 import lx.lindx.talx.client.net.IMessageProcessor;
 
 /**

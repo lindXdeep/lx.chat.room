@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import lx.lindx.talx.client.model.UserAddress;
-import lx.lindx.talx.client.net.InetService;
 
 public class Util {
 

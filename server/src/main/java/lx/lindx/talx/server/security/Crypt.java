@@ -1,6 +1,7 @@
 package lx.lindx.talx.server.security;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -8,6 +9,8 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -24,11 +27,15 @@ public class Crypt {
   private KeyPair keyPair;
   private SecretKeySpec keyAES;
 
+  // TODO: delete
+  byte[] sharedKeySecret;
+
   public Crypt() {
 
   }
 
-  public void setClientPubKey(byte[] publicKeyClient) throws GeneralSecurityException { // Generate our public key for client
+  public void setClientPubKey(byte[] publicKeyClient) throws GeneralSecurityException { // Generate our public key for
+                                                                                        // client
 
     PublicKey publicKey = KeyFactory.getInstance("DH").generatePublic(new X509EncodedKeySpec(publicKeyClient));
 
@@ -48,7 +55,7 @@ public class Crypt {
       keyAgree.init(keyPair.getPrivate());
       keyAgree.doPhase(publicKey, true);
 
-      byte[] sharedKeySecret = keyAgree.generateSecret();
+      sharedKeySecret = keyAgree.generateSecret();
 
       keyAES = new SecretKeySpec(sharedKeySecret, 0, 16, "AES");
 
@@ -57,29 +64,35 @@ public class Crypt {
     }
   }
 
-  public SecretKeySpec getKeyAES() {
-    return keyAES;
+  public byte[] getSharedKeySecret() {
+    return sharedKeySecret;
   }
 
-  public byte[][] encrypt(byte[] bytes) {
+  public byte[] encrypt(byte[] bytes) {
 
-    byte[] cipherMessage = null;
-    byte[] encodedParams = null;
+    ByteBuffer buf = null;
 
     try {
 
       Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
       cipher.init(Cipher.ENCRYPT_MODE, keyAES);
 
-      cipherMessage = cipher.doFinal(bytes);
-      encodedParams = cipher.getParameters().getEncoded();
+      byte[] paramEncoded = cipher.getParameters().getEncoded();
+      byte[] cipherMessage = cipher.doFinal(bytes);
 
-      return new byte[][] { cipherMessage, encodedParams };
+      //TODO: DELEte
+      System.out.println("p:> " + paramEncoded.length );
+      System.out.println("c:> " + cipherMessage.length );
+
+      buf = ByteBuffer.allocate(paramEncoded.length + cipherMessage.length); // 18 + all...
+      buf.put(paramEncoded); // 18
+      buf.put(cipherMessage); // all....
+
+      return buf.array();
 
     } catch (GeneralSecurityException | IOException e) {
       e.printStackTrace();
     }
-
     return null;
   }
 

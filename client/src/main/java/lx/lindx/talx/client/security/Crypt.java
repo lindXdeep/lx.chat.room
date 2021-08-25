@@ -29,11 +29,10 @@ public class Crypt {
 
   private SecretKeySpec keyAES;
 
-  private Connection connection;
+  //TODO: delete
+  byte[] sharedKeySecret;
 
-  public Crypt(Connection connection) {
-
-    this.connection = connection;
+  public Crypt() {
 
     try {
 
@@ -66,43 +65,31 @@ public class Crypt {
     }
   }
 
-  public SecretKeySpec getKeyAES() {
-    return keyAES;
-  }
+  // TODO: delete
+ public byte[] getSharedKeySecret() {
+   return sharedKeySecret;
+ }
 
-  public void encryptConnection() {
-
-    Util.toConsole("Sending public key to server");
-    connection.sendBytes(pubkeyEncoded);
-
-    connection.readNBytes(557);
-    this.setServerPubKey(connection.getBuffer());
-    Util.toConsole("Public key from server received");
-
-    connection.readNBytes(16);
-    System.out.println(Arrays.equals(keyAES.getEncoded(), connection.getBuffer()));
-  }
-
-  public void decrypt(final byte[] buffer, byte[] b) {
+  public byte[] decrypt(final byte[] encodeParam, final byte[] buffer) {
 
     try {
       AlgorithmParameters aesParams = AlgorithmParameters.getInstance("AES");
 
-      aesParams.init(b);
+      aesParams.init(encodeParam);
 
       Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
       cipher.init(Cipher.DECRYPT_MODE, keyAES, aesParams);
 
-      byte[] recovered = cipher.doFinal(buffer);
+      return cipher.doFinal(buffer);
 
-      System.out.println(new String(recovered, 0, recovered.length));
-      
     } catch (GeneralSecurityException | IOException e) {
       e.printStackTrace();
     }
-
     
+    throw new RuntimeException();
+  }
 
-
+  public byte[] getPubKeyEncoded() {
+    return pubkeyEncoded;
   }
 }

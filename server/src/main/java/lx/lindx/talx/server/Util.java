@@ -3,8 +3,6 @@ package lx.lindx.talx.server;
 import java.net.Socket;
 import java.util.Arrays;
 
-import lx.lindx.talx.server.security.Crypt;
-
 public class Util {
 
   private static final String ver = "ver-0.1";
@@ -102,14 +100,4 @@ public class Util {
     Util.log(
         addr.concat(":" + port).concat(" / msg size[").concat(lengthCommand).concat("] / command: ").concat(command));
   }
-
-  public static void logEncrypt(Connection connection) {
-
-    if (connection.isEncrypted()) {
-      Util.log("Key exchange was successful");
-    } else {
-      Util.log("Сonnection is not secure");
-    }
-  }
-
 }

@@ -1,9 +1,10 @@
-package lx.lindx.talx.client.net;
+package lx.lindx.talx.client;
 
 import java.io.IOException;
 
-import lx.lindx.talx.client.Util;
 import lx.lindx.talx.client.model.UserAddress;
+import lx.lindx.talx.client.net.Connection;
+import lx.lindx.talx.client.net.IMessageProcessor;
 
 public class InetService {
 
