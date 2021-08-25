@@ -45,8 +45,15 @@ public class Connection extends Thread {
     while (true) {
 
       byte[] b = protocol.read();
-      client.receive(new String(b, 0, b.length));
 
+      // System.out.println(":::>>");
+      // System.out.println(new String(b, 0, b.length));
+      // System.out.println("=====");
+
+
+
+
+      client.receive(new String(b, 0, b.length));
     }
 
   }
@@ -80,6 +87,12 @@ public class Connection extends Thread {
   // }
 
   public void sendMsg(final String str) {
+
+    // try {
+    //   out.write(str.getBytes());
+    // } catch (IOException e) {
+    //   e.printStackTrace();
+    // }
 
     try {
       protocol.sendMsg(str);

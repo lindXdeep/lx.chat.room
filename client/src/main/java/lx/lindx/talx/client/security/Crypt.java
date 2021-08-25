@@ -90,7 +90,7 @@ public class Crypt {
     try {
 
       Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-      cipher.init(Cipher.DECRYPT_MODE, keyAES);
+      cipher.init(Cipher.ENCRYPT_MODE, keyAES);
 
       byte[] cipherMsg = cipher.doFinal(bytes);
       byte[] encodeParam = cipher.getParameters().getEncoded();

@@ -54,48 +54,65 @@ public class Connection extends Thread {
   private void menu() {
     try {
 
-      sendMsg(Util.getLogo()
+      sendMsg(Util.getLogo());
+      System.out.println("send logo:");
 
-          .concat(Util.getInstruction()));
+      sendMsg(Util.getInstruction());
+      System.out.println("send instr:");
 
       while (true) {
 
-        sendMsg("\n > ");
+      sendMsg("/n> ");
+      System.out.println("send curs:");
 
+        clearBuffer();
+        System.out.println("wait: __");
+        
         byte[] b = protocol.read();
-       
+        
         System.out.println(new String(b, 0, b.length));
 
-        System.out.println("-------------");
-        
-
-       // byte[] b = protocol.read();
-
-        // sendCursor(); // data will be in buffer
-
-        // switch (new String(buffer, 0, buffer.length).trim()) {
-        //   case "/help":
-        //     sendMsg(Util.getHelp());
-        //     break;
-        //   case "/about":
-        //     sendMsg(Util.getLogo().substring(140, Util.getLogo().length() - 1));
-        //     break;
-        //   case "/new":
-        //     createAccount();
-        //     break;
-        //   case "/auth":
-        //     authorize();
-        //     break;
-        //   case "/end":
-        //     // TODO: kill connection
-        //     break;
-        //   default:
-        //     sendMsg(Util.getInstruction());
-        // }
-
-       // Util.logCommand(this);
+       // System.out.println(new String(buffer, 0, buffer.length));
 
       }
+
+      // while (true) {
+
+      // sendMsg("\n > ");
+
+      // byte[] b = protocol.read();
+
+      // System.out.println(new String(b, 0, b.length));
+
+      // System.out.println("-------------");
+
+      // byte[] b = protocol.read();
+
+      // sendCursor(); // data will be in buffer
+
+      // switch (new String(buffer, 0, buffer.length).trim()) {
+      // case "/help":
+      // sendMsg(Util.getHelp());
+      // break;
+      // case "/about":
+      // sendMsg(Util.getLogo().substring(140, Util.getLogo().length() - 1));
+      // break;
+      // case "/new":
+      // createAccount();
+      // break;
+      // case "/auth":
+      // authorize();
+      // break;
+      // case "/end":
+      // // TODO: kill connection
+      // break;
+      // default:
+      // sendMsg(Util.getInstruction());
+      // }
+
+      // Util.logCommand(this);
+
+      // }
 
     } catch (ClientSocketExceprion e) {
       Util.log(e.getMessage());
@@ -215,10 +232,10 @@ public class Connection extends Thread {
   }
 
   // public InputStream getStdIn() {
-  //   return this.in;
+  // return this.in;
   // }
 
   // public BufferedOutputStream getStdOut() {
-  //   return this.out;
+  // return this.out;
   // }
 }

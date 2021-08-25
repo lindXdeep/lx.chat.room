@@ -46,7 +46,7 @@ public class Protocol implements IMsgProtocol {
     buf.put(intToByte(encodeParamAndCipherMsg.length - 18)); // 4
     buf.put(encodeParamAndCipherMsg); // 18 + all ...
 
-    System.out.println("send" + buf.array().length);
+    System.out.println("\nsend: " + buf.array().length + "\n");
 
     sendBytes(buf.array());
   }
@@ -94,7 +94,7 @@ public class Protocol implements IMsgProtocol {
     try {
       connection.out.write(bytes);
       connection.out.flush();
-    } catch (Exception e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }

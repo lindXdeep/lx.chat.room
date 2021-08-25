@@ -21,10 +21,6 @@ public class Crypt {
   private KeyPair keyPair;
   private SecretKeySpec keyAES;
 
-  public Crypt() {
-
-  }
-
   public void setClientPubKey(byte[] publicKeyClient) throws GeneralSecurityException { // Generate our public key for
                                                                                         // client
 
@@ -55,6 +51,11 @@ public class Crypt {
     }
   }
 
+
+  public byte[] getPubKeyEncoded() {
+    return keyPair.getPublic().getEncoded();
+  }
+
   public byte[] encrypt(byte[] bytes) {
 
     ByteBuffer buf = null;
@@ -79,10 +80,6 @@ public class Crypt {
     return null;
   }
 
-  public byte[] getPubKeyEncoded() {
-    return keyPair.getPublic().getEncoded();
-  }
-
   public byte[] decrypt(final byte[] encodeParam, final byte[] buffer) {
 
     try {
@@ -101,4 +98,5 @@ public class Crypt {
 
     throw new RuntimeException();
   }
+
 }
