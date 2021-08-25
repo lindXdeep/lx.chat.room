@@ -14,8 +14,8 @@ import lx.lindx.talx.server.security.Crypt;
 
 public class Connection extends Thread {
 
-  private Crypt crypt = new Crypt();
-  private MsgProtocol protocol = new MsgProtocol(this);
+  private Crypt crypt;
+  private IMsgProtocol protocol;
 
   private Socket client;
   private Server server;
@@ -31,6 +31,9 @@ public class Connection extends Thread {
     this.client = client;
     this.server = server;
 
+    this.crypt = new Crypt();
+    this.protocol = new Protocol(this, crypt);
+
     try {
       this.out = new BufferedOutputStream(client.getOutputStream());
       this.in = client.getInputStream();
@@ -45,8 +48,6 @@ public class Connection extends Thread {
   public void run() {
 
     executeKeyExchange();
-
-    Util.logEncrypt(this);
 
     menu();
 
