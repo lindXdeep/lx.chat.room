@@ -3,6 +3,8 @@ package lx.lindx.talx.server;
 import java.net.Socket;
 import java.util.Arrays;
 
+import lx.lindx.talx.server.security.Crypt;
+
 public class Util {
 
   private static final String ver = "ver-0.1";
@@ -87,10 +89,10 @@ public class Util {
 
   }
 
-  public static void logCommand(Connectrion connectrion) {
+  public static void logCommand(Connection connection) {
 
-    byte[] buffer = connectrion.getBuffer();
-    Socket client = connectrion.getClient();
+    byte[] buffer = connection.getBuffer();
+    Socket client = connection.getClient();
 
     String command = new String(buffer, 0, buffer.length).trim();
     String lengthCommand = String.valueOf(command.length());
@@ -99,6 +101,15 @@ public class Util {
 
     Util.log(
         addr.concat(":" + port).concat(" / msg size[").concat(lengthCommand).concat("] / command: ").concat(command));
+  }
+
+  public static void logEncrypt(Connection connection) {
+
+    if (connection.isEncrypted()) {
+      Util.log("Key exchange was successful");
+    } else {
+      Util.log("Сonnection is not secure");
+    }
   }
 
 }

@@ -1,50 +1,44 @@
 package lx.lindx.talx.server.security;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import lx.lindx.talx.server.Connectrion;
+import lx.lindx.talx.server.Connection;
 import lx.lindx.talx.server.Util;
 
 public class Crypt {
 
-  private Connectrion connection;
-
   private KeyPair keyPair;
   private SecretKeySpec keyAES;
 
-  public Crypt(Connectrion connectrion) {
-    this.connection = connectrion;
+  public Crypt() {
+
   }
 
-  private void setClientPubKey(byte[] publicKeyClient) { // Generate our public key for client
+  public void setClientPubKey(byte[] publicKeyClient) throws GeneralSecurityException { // Generate our public key for client
 
-    try {
-      PublicKey publicKey = KeyFactory.getInstance("DH").generatePublic(new X509EncodedKeySpec(publicKeyClient));
+    PublicKey publicKey = KeyFactory.getInstance("DH").generatePublic(new X509EncodedKeySpec(publicKeyClient));
 
-      DHParameterSpec dhParamFromServer = ((DHPublicKey) publicKey).getParams();
+    DHParameterSpec dhParamFromServer = ((DHPublicKey) publicKey).getParams();
 
-      KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
-      keyPairGenerator.initialize(dhParamFromServer);
-      keyPair = keyPairGenerator.generateKeyPair();
+    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
+    keyPairGenerator.initialize(dhParamFromServer);
+    keyPair = keyPairGenerator.generateKeyPair();
 
-      generateSharedKey(publicKey);
-
-    } catch (GeneralSecurityException e) {
-      Util.log("Connection from:" + Util.getAddress(connection.getClient()) + "rejected because public key is invalid");
-      connection
-          .sendBytes("Access denied: public key is invalid.".concat(Util.getIp(connection.getClient())).getBytes());
-      connection.kill();
-    }
+    generateSharedKey(publicKey);
   }
 
   private void generateSharedKey(PublicKey publicKey) {
@@ -63,27 +57,33 @@ public class Crypt {
     }
   }
 
-  public void encryptConnection() {
-
-    Util.log("Waiting public key from client: " + Util.getAddress(connection.getClient()));
-    connection.readNBytes(557);
-
-    setClientPubKey(connection.getBuffer());
-
-    if (connection.getClient().isClosed()) {
-      return;
-    }
-
-    Util.log("Public key from" + Util.getAddress(connection.getClient()) + "received");
-
-    connection.sendBytes(keyPair.getPublic().getEncoded());
-    Util.log("Public key sent to client:" + Util.getAddress(connection.getClient()));
-
-    System.out.println("send AES");
-    connection.sendBytes(getKeyAES().getEncoded());
-  }
-
   public SecretKeySpec getKeyAES() {
     return keyAES;
+  }
+
+  public byte[][] encrypt(byte[] bytes) {
+
+    byte[] cipherMessage = null;
+    byte[] encodedParams = null;
+
+    try {
+
+      Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      cipher.init(Cipher.ENCRYPT_MODE, keyAES);
+
+      cipherMessage = cipher.doFinal(bytes);
+      encodedParams = cipher.getParameters().getEncoded();
+
+      return new byte[][] { cipherMessage, encodedParams };
+
+    } catch (GeneralSecurityException | IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  public byte[] getPubKeyEncoded() {
+    return keyPair.getPublic().getEncoded();
   }
 }

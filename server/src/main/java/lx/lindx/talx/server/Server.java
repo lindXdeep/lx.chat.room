@@ -21,7 +21,7 @@ public class Server {
           Util.log("Waiting connections...");
           Socket socket = serverSocket.accept();
           Util.log("Client" + Util.getAddress(socket) + "connected!");
-          new Connectrion(socket, this).start();
+          new Connection(socket, this).start();
         }
       } catch (IOException e) {
         e.printStackTrace();

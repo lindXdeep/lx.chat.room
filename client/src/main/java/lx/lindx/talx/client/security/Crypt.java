@@ -1,13 +1,17 @@
 package lx.lindx.talx.client.security;
 
+import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -77,5 +81,28 @@ public class Crypt {
 
     connection.readNBytes(16);
     System.out.println(Arrays.equals(keyAES.getEncoded(), connection.getBuffer()));
+  }
+
+  public void decrypt(final byte[] buffer, byte[] b) {
+
+    try {
+      AlgorithmParameters aesParams = AlgorithmParameters.getInstance("AES");
+
+      aesParams.init(b);
+
+      Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      cipher.init(Cipher.DECRYPT_MODE, keyAES, aesParams);
+
+      byte[] recovered = cipher.doFinal(buffer);
+
+      System.out.println(new String(recovered, 0, recovered.length));
+      
+    } catch (GeneralSecurityException | IOException e) {
+      e.printStackTrace();
+    }
+
+    
+
+
   }
 }

@@ -35,24 +35,26 @@ public class Connection extends Thread {
 
     crypt.encryptConnection();
 
-
-    System.out.println("--------------------------end--------------------");
-    return;
-
-   /*  while (true) {
-
-      buffer = new byte[1048576];
+    while (true) {
 
       try {
+        int i = 0;
+        int b = 0;
+   
+        while ((b = in.read(buffer)) != -1) {
+          i++;
+        }
 
-        in.read(buffer);
+        System.out.println(i);
 
-        InetService.receive(new String(buffer, 0, buffer.length));
+        i = 0;
+
+        // InetService.receive(new String(buffer, 0, buffer.length));
 
       } catch (IOException e) {
         e.printStackTrace();
       }
-    } */
+    }
 
   }
 
