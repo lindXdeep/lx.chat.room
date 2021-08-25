@@ -41,7 +41,7 @@ public class InetService {
     return this;
   }
 
-  public static void receive(String str) {
+  public void receive(String str) {
     msgProcessor.processMessage(str);
   }
 

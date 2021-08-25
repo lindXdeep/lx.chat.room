@@ -18,14 +18,11 @@ public class Connection extends Thread {
   BufferedOutputStream out;
   InputStream in;
 
-  // private boolean encrypted;
-
   public Connection(Socket client, Server server) {
 
     this.client = client;
     this.server = server;
 
-    // this.crypt = new Crypt();
     this.protocol = new Protocol(this);
 
     try {
@@ -57,34 +54,46 @@ public class Connection extends Thread {
   private void menu() {
     try {
 
-      sendMsg(Util.getLogo());
-      sendMsg(Util.getInstruction());
+      sendMsg(Util.getLogo()
+
+          .concat(Util.getInstruction()));
 
       while (true) {
 
-        sendCursor(); // data will be in buffer
+        sendMsg("\n > ");
 
-        switch (new String(buffer, 0, buffer.length).trim()) {
-          case "/help":
-            sendMsg(Util.getHelp());
-            break;
-          case "/about":
-            sendMsg(Util.getLogo().substring(140, Util.getLogo().length() - 1));
-            break;
-          case "/new":
-            createAccount();
-            break;
-          case "/auth":
-            authorize();
-            break;
-          case "/end":
-            // TODO: kill connection
-            break;
-          default:
-            sendMsg(Util.getInstruction());
-        }
+        byte[] b = protocol.read();
+       
+        System.out.println(new String(b, 0, b.length));
 
-        Util.logCommand(this);
+        System.out.println("-------------");
+        
+
+       // byte[] b = protocol.read();
+
+        // sendCursor(); // data will be in buffer
+
+        // switch (new String(buffer, 0, buffer.length).trim()) {
+        //   case "/help":
+        //     sendMsg(Util.getHelp());
+        //     break;
+        //   case "/about":
+        //     sendMsg(Util.getLogo().substring(140, Util.getLogo().length() - 1));
+        //     break;
+        //   case "/new":
+        //     createAccount();
+        //     break;
+        //   case "/auth":
+        //     authorize();
+        //     break;
+        //   case "/end":
+        //     // TODO: kill connection
+        //     break;
+        //   default:
+        //     sendMsg(Util.getInstruction());
+        // }
+
+       // Util.logCommand(this);
 
       }
 
@@ -164,7 +173,7 @@ public class Connection extends Thread {
     clearBuffer();
     sendMsg("\n > ");
     try {
-      in.read(buffer);
+      protocol.read();
     } catch (IOException e) {
       throw new ClientSocketExceprion(
           "Client" + Util.getAddress(client) + "-/-> Server:[" + server.getPort() + "] ::: Connection reset");
@@ -180,12 +189,6 @@ public class Connection extends Thread {
   public void sendMsg(String msg) throws ClientSocketExceprion {
     protocol.sendMsg(msg);
   }
-
-
-
-
-
-  
 
   private void clearBuffer() {
     buffer = new byte[32];
@@ -211,11 +214,11 @@ public class Connection extends Thread {
     }
   }
 
-  public InputStream getStdIn() {
-    return this.in;
-  }
+  // public InputStream getStdIn() {
+  //   return this.in;
+  // }
 
-  public BufferedOutputStream getStdOut() {
-    return this.out;
-  }
+  // public BufferedOutputStream getStdOut() {
+  //   return this.out;
+  // }
 }

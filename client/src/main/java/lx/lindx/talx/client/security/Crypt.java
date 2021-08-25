@@ -1,8 +1,10 @@
 package lx.lindx.talx.client.security;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -28,9 +30,6 @@ public class Crypt {
   private byte[] pubkeyEncoded;
 
   private SecretKeySpec keyAES;
-
-  //TODO: delete
-  byte[] sharedKeySecret;
 
   public Crypt() {
 
@@ -65,11 +64,6 @@ public class Crypt {
     }
   }
 
-  // TODO: delete
- public byte[] getSharedKeySecret() {
-   return sharedKeySecret;
- }
-
   public byte[] decrypt(final byte[] encodeParam, final byte[] buffer) {
 
     try {
@@ -85,8 +79,33 @@ public class Crypt {
     } catch (GeneralSecurityException | IOException e) {
       e.printStackTrace();
     }
-    
+
     throw new RuntimeException();
+  }
+
+  public byte[] encrypt(byte[] bytes) {
+
+    ByteBuffer buf;
+
+    try {
+
+      Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      cipher.init(Cipher.DECRYPT_MODE, keyAES);
+
+      byte[] cipherMsg = cipher.doFinal(bytes);
+      byte[] encodeParam = cipher.getParameters().getEncoded();
+
+      buf = ByteBuffer.allocate(encodeParam.length + cipherMsg.length); // 18 + all...
+      buf.put(encodeParam);
+      buf.put(cipherMsg);
+
+      return buf.array();
+
+    } catch (GeneralSecurityException | IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
   }
 
   public byte[] getPubKeyEncoded() {

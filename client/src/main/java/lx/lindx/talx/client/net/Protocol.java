@@ -20,15 +20,48 @@ public class Protocol implements IMsgProtocol {
   }
 
   @Override
-  public void sendMsg(String msg) throws ClientSocketExceprion {
-    // TODO Auto-generated method stub
+  public void executeKeyExchange() throws ClientSocketExceprion {
 
+    Util.toConsole("Sending public key to server");
+    sendBytes(crypt.getPubKeyEncoded());
+
+    readNBytes(557);
+    crypt.setServerPubKey(buffer);
+    Util.toConsole("Public key from server received");
+  }
+
+  // send wrapper
+  @Override
+  public void sendMsg(String msg) throws ClientSocketExceprion {
+    send(msg.getBytes());
   }
 
   @Override
   public void send(byte[] bytes) throws ClientSocketExceprion {
-    // TODO Auto-generated method stub
+
+    byte[] encodeParamAndCipherMsg = crypt.encrypt(bytes); // 18 + all...
+
+    ByteBuffer buf = ByteBuffer.allocate(4 + encodeParamAndCipherMsg.length); // 4 + 18 + all...
+
+    buf.put(intToByte(encodeParamAndCipherMsg.length - 18)); // 4
+    buf.put(encodeParamAndCipherMsg); // 18 + all ...
+
+    System.out.println("send" + buf.array().length);
+
+    sendBytes(buf.array());
   }
+
+  private byte[] intToByte(int i) {
+    return new byte[] {
+
+        (byte) ((i >> 24) & 0xFF),
+
+        (byte) ((i >> 16) & 0xFF),
+
+        (byte) ((i >> 8) & 0xFF),
+
+        (byte) ((i >> 0) & 0xFF) };
+  };
 
   @Override
   public byte[] read() {
@@ -39,22 +72,9 @@ public class Protocol implements IMsgProtocol {
     byte[] encodeSpec = Arrays.copyOfRange(buffer, 4, 22); // 4 - 22
     byte[] cipherMsg = Arrays.copyOfRange(buffer, 22, msgLength + 22); // 22 + msg.length + shift(22)
 
+    Util.toConsole("recive: " + (4 + encodeSpec.length + msgLength));
+
     return crypt.decrypt(encodeSpec, cipherMsg);
-  }
-
-  @Override
-  public void executeKeyExchange() throws ClientSocketExceprion {
-
-    Util.toConsole("Sending public key to server");
-    sendBytes(crypt.getPubKeyEncoded());
-
-    readNBytes(557);
-    crypt.setServerPubKey(buffer);
-    Util.toConsole("Public key from server received");
-
-    // TODO: delelte
-    readNBytes(256);
-    System.out.println(Arrays.equals(crypt.getSharedKeySecret(), connection.getBuffer()));
   }
 
   // not secure

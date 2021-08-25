@@ -1,9 +1,6 @@
 package lx.lindx.talx.server;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -40,7 +37,7 @@ public class Protocol implements IMsgProtocol {
 
       crypt.setClientPubKey(buffer);
 
-    } catch (GeneralSecurityException e)  {
+    } catch (GeneralSecurityException e) {
       Util.log("Connection from:" + Util.getAddress(client) + "rejected because public key is invalid");
       sendBytes("Access denied: public key is invalid.".concat(Util.getIp(client)).getBytes());
       connection.kill();
@@ -53,10 +50,6 @@ public class Protocol implements IMsgProtocol {
 
     sendBytes(crypt.getPubKeyEncoded());
     Util.log("Sent server public key to client:" + Util.getAddress(client));
-
-    // TODO: delete
-    System.out.println("send AES: " + crypt.getSharedKeySecret().length );
-    sendBytes(crypt.getSharedKeySecret());
 
     encrypted = true;
   }
@@ -73,13 +66,9 @@ public class Protocol implements IMsgProtocol {
     }
   }
 
-  
-
   // wrapper for msg
   @Override
-  public void sendMsg(String msg) throws ClientSocketExceprion  {
-
-    System.out.println("input: " + msg.getBytes().length);
+  public void sendMsg(String msg) throws ClientSocketExceprion {
 
     send(msg.getBytes());
   }
@@ -93,12 +82,7 @@ public class Protocol implements IMsgProtocol {
     byte[] encodeParamAndCipherMsg = crypt.encrypt(bytes); // 18 + all....
 
     buf = ByteBuffer.allocate(4 + encodeParamAndCipherMsg.length); // 4 + 18 + all...
-
     buf.put(intToByte(encodeParamAndCipherMsg.length - 18)); // 4 // length
-
-    //TODO: delete
-    System.out.println(">>[ " + (encodeParamAndCipherMsg.length - 18));
-
     buf.put(encodeParamAndCipherMsg); // 18 + all // param and cipher
 
     sendBytes(buf.array());
@@ -120,8 +104,19 @@ public class Protocol implements IMsgProtocol {
 
   @Override
   public byte[] read() {
-    return null;
+
+    readNBytes(8192);
+
+    int msgLength = byteToInt(Arrays.copyOfRange(buffer, 0, 4)); // 0 - 3
+    byte[] encodeSpec = Arrays.copyOfRange(buffer, 4, 22); // 4 - 22
+    byte[] cipherMsg = Arrays.copyOfRange(buffer, 22, msgLength + 22); // 22 + msg.length + shift(22)
+
+    Util.log("recive: " + (4 + encodeSpec.length + msgLength));
+
+    return crypt.decrypt(encodeSpec, cipherMsg);
   }
+
+
 
   @Override
   public void killIsNotEncrypted() {
@@ -147,5 +142,19 @@ public class Protocol implements IMsgProtocol {
         (byte) ((i >> 8) & 0xFF),
 
         (byte) ((i >> 0) & 0xFF) };
+  }
+
+  private int byteToInt(byte[] arr) {
+    return (arr != null || arr.length == 4) ?
+
+        (int) ((0xFF & arr[0]) << 24 |
+
+            (0xFF & arr[1]) << 16 |
+
+            (0xFF & arr[2]) << 8 |
+
+            (0xFF & arr[3]) << 0
+
+        ) : 0x0;
   }
 }
