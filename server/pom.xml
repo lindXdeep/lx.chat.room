@@ -5,28 +5,30 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>lx.lindx.talx</groupId>
-    <artifactId>talx</artifactId>
+    <groupId>lx.talx</groupId>
+    <artifactId>talx-b</artifactId>
     <version>v000</version>
   </parent>
 
-  <artifactId>server</artifactId>
+  <groupId>lx.talx.server</groupId>
+  <artifactId>talx-server</artifactId>
+  <version>v000</version>
+  <packaging>jar</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
 
-    <main.class>lx.lindx.talx.server.App</main.class>
+    <main.class>lx.talx.server.App</main.class>
   </properties>
 
   <name>TalX-Server</name>
-  <url>https://github.com/lindXdeep/lx.talx</url>
+  <url>https://github.com/lindXdeep/gb-javacore-hw/tree/hw-015</url>
 
-  
-<build>
-  <plugins>
-     <plugin>
+  <build>
+    <plugins>
+      <plugin>
         <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -43,6 +45,8 @@
           </execution>
         </executions>
       </plugin>
-  </plugins>
-</build>
+    </plugins>
+  </build>
+
+
 </project>
