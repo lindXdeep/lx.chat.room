@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>lx.talx</groupId>
+    <artifactId>talx-b</artifactId>
+    <version>v000</version>
+  </parent>
+
+  <groupId>lx.talx.client</groupId>
+  <artifactId>talx-client</artifactId>
+  <version>v000</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
+
+    <main.class>lx.talx.client.App</main.class>
+  </properties>
+
+
+  <name>TalX-Client</name>
+  <url>https://github.com/lindXdeep/gb-javacore-hw/tree/hw-015</url>
+
+</project>

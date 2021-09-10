@@ -1,9 +1,8 @@
-package lx.lindx.talx.server.error;
+package lx.talx.client.error;
 
 import java.net.SocketException;
 
 public class ClientSocketExceprion extends SocketException {
-
   public ClientSocketExceprion(String string) {
     super(string);
   }
