@@ -1,14 +1,29 @@
 package lx.talx.server.service;
 
+import java.sql.Connection;
 import java.util.List;
 
 import lx.talx.server.dao.IUserDao;
+import lx.talx.server.dao.UserDaoDataBase;
 import lx.talx.server.dao.UserDaoInMemory;
 import lx.talx.server.model.User;
 
 public class UserServiceImpl implements IUserService {
 
-  IUserDao userDao = new UserDaoInMemory();
+  private IUserDao userDao;
+
+  public UserServiceImpl() {
+
+    DataBaseService.loadProperties();
+
+    if (DataBaseService.connect) {
+      System.out.println("-- -- -- database");
+      userDao = new UserDaoDataBase();
+    } else {
+      System.out.println("== == == in memory");
+      userDao = new UserDaoInMemory();
+    }
+  }
 
   @Override
   public void add(User user) {

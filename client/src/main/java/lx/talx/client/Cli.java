@@ -73,20 +73,23 @@ public class Cli implements ICommandLine {
 
   @Override
   public void execute(String command) throws WrongCommandException {
-    if (command.matches("^/signin") || command.matches("^1")) {
+
+    if (command.matches("^/help") || command.matches("^0")) {
+      help();
+    } else if (command.matches("^/status") || command.matches("^1")) {
+      status();
+    } else if (command.matches("^/signin") || command.matches("^2")) {
       if (connect.getStatus() & !auth.isLoginStatus()) {
         auth();
       } else {
         status();
       }
-    } else if (command.matches("^/signup") || command.matches("^2")) {
+    } else if (command.matches("^/signup") || command.matches("^3")) {
       if (auth.isLoginStatus()) {
         logout();
         connect();
       }
       signup();
-    } else if (command.matches("^/status") || command.matches("^3")) {
-      status();
     } else if (command.matches("^/connect") || command.matches("^4")) {
       connect();
     } else if (command.matches("^/connect\\s\\d{2,5}") || command.matches("^5\\s\\d{2,5}")) {
@@ -99,8 +102,6 @@ public class Cli implements ICommandLine {
       logout();
     } else if (command.matches("^/exit") || command.matches("^9")) {
       exit();
-    } else if (command.matches("^/help") || command.matches("^10")) {
-      help();
     } else if (command.matches("^@[a-zA-Z]{3,64}\\s.{0,4096}")) {
       sendMessage(command);
     } else if (command.matches("^/online")) {
@@ -306,8 +307,10 @@ public class Cli implements ICommandLine {
   private void enterToAccount() {
     if (connect.getStatus()) {
       if (!auth.enterToAccount()) {
-        System.out.println("Auth key not exist. Please login\n");
-        System.out.println("Type 11 or /help - for more information");
+        System.out.println("-- [Auth key not exist. Please login!] --\n");
+        System.out.println("Type 2 - if you have account or 3 for create it.\n");
+        System.out.println("Type 0 or /help - for more information");
+        System.out.println("Type 1 or /status - for get status");
       }
     }
   }
@@ -361,11 +364,13 @@ public class Cli implements ICommandLine {
 
     String[] help = {
 
-        " 1. /signin             - Authentication",
+        " 0. /help               - Help",
 
-        " 2. /sigup              - Authorization",
+        " 1. /status             - Сurrent status",
 
-        " 3. /status             - Сurrent status",
+        " 2. /signin             - Authentication",
+
+        " 3. /sigup              - Authorization",
 
         " 4. /connect            - Try connect to the server using last address:" + connect.getAddress().toString(),
 
@@ -378,8 +383,6 @@ public class Cli implements ICommandLine {
         " 8. /logout             - Logout from the user account",
 
         " 9. /exit               - Exit from the Talx",
-
-        "10. /help               - Help",
 
         "------------------------ Online options ------------------------",
 

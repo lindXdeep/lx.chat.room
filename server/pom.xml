@@ -24,7 +24,7 @@
   </properties>
 
   <name>TalX-Server</name>
-  <url>https://github.com/lindXdeep/gb-javacore-hw/tree/hw-015</url>
+  <url>https://github.com/lindXdeep/lx.talx/tree/main/server</url>
 
   <build>
     <plugins>
