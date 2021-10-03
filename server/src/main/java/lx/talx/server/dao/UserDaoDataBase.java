@@ -1,59 +1,56 @@
 package lx.talx.server.dao;
 
-import java.sql.Statement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.List;
 
 import lx.talx.server.model.User;
+import lx.talx.server.model.UserBuilder;
 import lx.talx.server.service.DataBaseService;
-import lx.talx.server.utils.Log;
+import lx.talx.server.utils.*;
 
 public class UserDaoDataBase implements IUserDao {
 
   private Connection connection;
   private Statement statement;
-  private Savepoint savepoint;
 
   public UserDaoDataBase() {
+
     try {
       connection = DataBaseService.getConnection();
-
-      if (connection != null) {
-        System.out.println("connection ---> db");
-      }
-
     } catch (SQLException e) {
-      Log.error(e.getMessage());
+      e.printStackTrace();
     }
-
     createUserTable();
-    System.out.println("Table create");
   }
 
   private void createUserTable() {
 
-    String sqlCreateUsers = "CREATE TABLE IF NOT EXISTS users(\n" + //
-        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" + //
-        "user_name TEXT NOT NULL,\n" + //
-        "email TEXT NOT NULL,\n" + //
-        "password TEXT NOT NULL,\n" + //
-        "auth_code TEXT NOT NULL,\n" + //
-        "nick_name TEXT NOT NULL);\n";
+    String sql = """
+        CREATE TABLE IF NOT EXISTS users (
+          id        INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          user_name TEXT    NOT NULL,
+          email     TEXT    NOT NULL,
+          password  TEXT    NOT NULL,
+          auth_code TEXT    NOT NULL,
+          nick_name TEXT    NOT NULL
+        );""";
 
     try {
       connection.setAutoCommit(false);
       statement = connection.createStatement();
-      statement.executeUpdate(sqlCreateUsers);
+      statement.executeUpdate(sql);
     } catch (SQLException e1) {
-      Log.info(e1.getMessage());
+      e1.printStackTrace();
     } finally {
       try {
         connection.setAutoCommit(true);
         statement.close();
-      } catch (SQLException e) {
-        Log.error(e.getMessage());
+      } catch (SQLException e2) {
+        e2.printStackTrace();
       }
     }
   }
@@ -61,35 +58,100 @@ public class UserDaoDataBase implements IUserDao {
   @Override
   public void add(User user) {
 
+    String sql = """
+        INSERT INTO users ('user_name', 'email', 'password', 'auth_code', 'nick_name')
+          VALUES(?,?,?,?,?);
+        """;
+
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+      preparedStatement.setString(1, user.getUserName());
+      preparedStatement.setString(2, user.getEmail());
+      preparedStatement.setString(3, user.getPassword());
+      preparedStatement.setString(4, user.getAuthCode());
+      preparedStatement.setString(5, user.getNickName());
+
+      preparedStatement.executeUpdate();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
   public List<User> listUsers() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public User getUserByUserName(String username) {
-    // TODO Auto-generated method stub
-    return null;
+
+    return selectFromUsers( //
+        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
+            "FROM users WHERE user_name=?;", //
+        username);
   }
 
   @Override
   public User getUserByEmail(String email) {
-    // TODO Auto-generated method stub
-    return null;
+
+    return selectFromUsers( //
+        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
+            "FROM users WHERE email=?;", //
+        email);
   }
 
   @Override
   public void delete(User user) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public User getUserByKey(String key) {
-    // TODO Auto-generated method stub
+
+    String sql = //
+        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
+            "FROM users WHERE auth_code=? AND password=?;";
+
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+      preparedStatement.setString(1, key.substring(0, 16));
+      preparedStatement.setString(2, key.substring(16));
+
+      return resultSet(preparedStatement.executeQuery());
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private User selectFromUsers(String sqlQuery, String where) {
+
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+
+      preparedStatement.setString(1, where);
+      return resultSet(preparedStatement.executeQuery());
+
+    } catch (SQLException e2) {
+      e2.printStackTrace();
+    }
+    return null;
+  }
+
+  private User resultSet(ResultSet resultSet) throws SQLException {
+
+    if (resultSet.next()) {
+      return new UserBuilder() //
+          .setId(resultSet.getInt("'id'")) //
+          .setUserName(resultSet.getString("'user_name'")) //
+          .setEmail(resultSet.getString("'email'")) //
+          .setPassword(resultSet.getString("'password'")) //
+          .setAuthCode(resultSet.getString("'auth_code'")) //
+          .setNickName(resultSet.getString("'nick_name'")) //
+          .build();
+    }
     return null;
   }
 }

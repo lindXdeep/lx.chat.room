@@ -8,7 +8,7 @@ public class User implements Serializable {
 
   private static final AtomicInteger count = new AtomicInteger();
 
-  private int id;
+  private int id = count.incrementAndGet();
   private String userName;
   private String email;
   private String password;
@@ -18,19 +18,23 @@ public class User implements Serializable {
   private String nickName;
 
   public User() {
-  } 
+  }
 
-  public User(String userName, String email, String password, String authCode, String nickName) {
-    this.id = count.incrementAndGet();
-    this.userName = userName;
-    this.email = email;
-    this.password = password;
-    this.authCode = authCode;
-    this.nickName = nickName;
+  public User(final UserBuilder userBuilder) {
+    this.id = userBuilder.getId();
+    this.userName = userBuilder.getUserName();
+    this.email = userBuilder.getEmail();
+    this.password = userBuilder.getPassword();
+    this.authCode = userBuilder.getAuthCode();
+    this.nickName = userBuilder.getNickName();
   }
 
   public int getId() {
     return this.id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public String getUserName() {
@@ -96,29 +100,23 @@ public class User implements Serializable {
 
     User user = (User) o;
 
-    return Objects.equals(this.id, user.id) &&
-
-        Objects.equals(this.userName, user.userName) &&
-
-        Objects.equals(this.nickName, user.nickName) &&
-
-        this.authCode == user.authCode &&
-
-        Objects.equals(this.email, user.email) &&
-
-        Objects.equals(this.password, user.password);
+    return Objects.equals(this.id, user.id) && //
+        Objects.equals(this.userName, user.userName) && //
+        Objects.equals(this.nickName, user.nickName) && //
+        this.authCode == user.authCode && //
+        Objects.equals(this.email, user.email) && //
+        Objects.equals(this.password, user.password); //
   }
-
 
   @Override
   public String toString() {
-    return "{" +
-      " id='" + getId() + "'" +
-      ", userName='" + getUserName() + "'" +
-      ", email='" + getEmail() + "'" +
-      ", password='" + getPassword() + "'" +
-      ", authCode='" + getAuthCode() + "'" +
-      ", nickName='" + getNickName() + "'" +
-      "}";
+    return "{" + //
+        " id='" + getId() + "'" + //
+        ", userName='" + getUserName() + "'" + //
+        ", email='" + getEmail() + "'" + //
+        ", password='" + getPassword() + "'" + //
+        ", authCode='" + getAuthCode() + "'" + //
+        ", nickName='" + getNickName() + "'" + //
+        "}";
   }
 }

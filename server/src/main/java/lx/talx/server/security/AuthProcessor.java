@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 
 import lx.talx.server.core.Server;
 import lx.talx.server.model.User;
+import lx.talx.server.model.UserBuilder;
 import lx.talx.server.service.*;
 import lx.talx.server.utils.Log;
 import lx.talx.server.utils.Util;
@@ -53,16 +54,19 @@ public class AuthProcessor {
 
   public byte[] create(JSONObject tmpUser, char[] authcode) {
 
+    User user = new User();
+
     if (userService.getUserByEmail((String) tmpUser.get("email")) == null
         & userService.getUserByUserName((String) tmpUser.get("username")) == null) {
 
       // add user in database
-      User user = new User();
-      user.setUserName((String) tmpUser.get("username"));
-      user.setEmail((String) tmpUser.get("email"));
-      user.setNickName((String) tmpUser.get("nickname"));
-      user.setAuthCode(String.valueOf(authcode));
-      user.setPassword(Util.toHash((String) tmpUser.get("password")));
+      user = new UserBuilder() //
+          .setUserName((String) tmpUser.get("username")) //
+          .setEmail((String) tmpUser.get("email")) //
+          .setNickName((String) tmpUser.get("nickname")) //
+          .setAuthCode(String.valueOf(authcode)) //
+          .setPassword(Util.toHash((String) tmpUser.get("password"))) //
+          .build();
 
       userService.add(user);
 

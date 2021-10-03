@@ -307,7 +307,7 @@ public class Cli implements ICommandLine {
   private void enterToAccount() {
     if (connect.getStatus()) {
       if (!auth.enterToAccount()) {
-        System.out.println("-- [Auth key not exist. Please login!] --\n");
+        System.out.println("\n-- [Auth key not exist. Please login!] --\n");
         System.out.println("Type 2 - if you have account or 3 for create it.\n");
         System.out.println("Type 0 or /help - for more information");
         System.out.println("Type 1 or /status - for get status");
