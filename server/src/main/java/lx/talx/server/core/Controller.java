@@ -46,7 +46,8 @@ public class Controller {
 
     } else if (msg.matches("^/online")) {
       server.getConnectionPool().executeSendUsersOnline(sender, msg);
-
+    } else if (msg.matches("^/whoami")) {
+      server.getConnectionPool().executeSendAboutMe(sender, msg);
     } else if (msg.matches("^/disconnect")) {
 
       sender = server.getAuthProcessor().getCurrentUserName();

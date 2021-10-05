@@ -124,7 +124,7 @@ public class Cli implements ICommandLine {
   }
 
   private void whoami(String command) {
-
+    connect.sendSecure("/whoami".getBytes());
   }
 
   private void delete(String command) {
