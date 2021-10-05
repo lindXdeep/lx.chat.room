@@ -16,6 +16,7 @@
   - User accounts
   - Command processing
   - status brodcasting: online / offline
+  - sqlite data
 
 - client:
   - You can connect by choosing any port and address: `java -jar client.jar --connect 127.0.0.1 8181`.
