@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import lx.talx.client.api.Auth;
@@ -73,20 +74,23 @@ public class Cli implements ICommandLine {
 
   @Override
   public void execute(String command) throws WrongCommandException {
-    if (command.matches("^/signin") || command.matches("^1")) {
+
+    if (command.matches("^/help") || command.matches("^0")) {
+      help();
+    } else if (command.matches("^/status") || command.matches("^1")) {
+      status();
+    } else if (command.matches("^/signin") || command.matches("^2")) {
       if (connect.getStatus() & !auth.isLoginStatus()) {
         auth();
       } else {
         status();
       }
-    } else if (command.matches("^/signup") || command.matches("^2")) {
+    } else if (command.matches("^/signup") || command.matches("^3")) {
       if (auth.isLoginStatus()) {
         logout();
         connect();
       }
       signup();
-    } else if (command.matches("^/status") || command.matches("^3")) {
-      status();
     } else if (command.matches("^/connect") || command.matches("^4")) {
       connect();
     } else if (command.matches("^/connect\\s\\d{2,5}") || command.matches("^5\\s\\d{2,5}")) {
@@ -99,8 +103,6 @@ public class Cli implements ICommandLine {
       logout();
     } else if (command.matches("^/exit") || command.matches("^9")) {
       exit();
-    } else if (command.matches("^/help") || command.matches("^10")) {
-      help();
     } else if (command.matches("^@[a-zA-Z]{3,64}\\s.{0,4096}")) {
       sendMessage(command);
     } else if (command.matches("^/online")) {
@@ -109,11 +111,54 @@ public class Cli implements ICommandLine {
       read(command);
     } else if (command.matches("^/read\\s@[a-zA-Z]{3,64}")) {
       read(command.concat(" " + 10));
+    } else if (command.matches("^/edit\\s[a-zA-Z]{3,64}")) {
+      edit(command);
+    } else if (command.matches("^/delete")) {
+      delete(command);
+    } else if (command.matches("^/whoami")) {
+      whoami(command);
     } else {
       throw new WrongCommandException(command);
     }
-
     Util.printCursor();
+  }
+
+  private void whoami(String command) {
+    connect.sendSecure("/whoami".getBytes());
+  }
+
+  private void delete(String command) {
+    System.out.println("\nYou are going to permanently delete your account.\n");
+    JSONObject password = prepareCredentionalData("password");
+    connect.sendSecure(command.concat(password.toJSONString()).getBytes());
+  }
+
+  private void edit(String command) {
+
+    String param = command.length() > 6 ? command.substring(6) : null;
+    String passParam = command.length() > 6 && param.matches("password") ? param : null;
+    String nickparam = command.length() > 6 && param.matches("nickname") ? param : null;
+
+    JSONArray update = new JSONArray();
+
+    if (passParam != null || nickparam != null) {
+      update.clear();
+
+      JSONObject updateParam = getParamsForUpdate(param);
+      update.add(updateParam);
+
+      if (nickparam != null)
+        update.add(prepareCredentionalData("password"));
+
+      connect.sendSecure(command.concat(update.toJSONString()).getBytes());
+    } else {
+      System.out.println("\nParameter: \'" + command.substring(6) + "\' - is not exist");
+      System.out.println("Type 0 or /help - for more information");
+    }
+  }
+
+  public JSONObject getParamsForUpdate(String param) {
+    return prepareCredentionalData("old ".concat(param), "new ".concat(param));
   }
 
   private void read(String command) {
@@ -181,11 +226,8 @@ public class Cli implements ICommandLine {
     try {
       connect.sendMessage(user, message);
     } catch (CantWriteBytesExeption e) {
-
     }
-
     writeForRecipient(user, message);
-
   }
 
   private void connect() {
@@ -214,6 +256,7 @@ public class Cli implements ICommandLine {
       Thread.sleep(500);
     } catch (InterruptedException e) {
       e.printStackTrace();
+      Thread.currentThread().interrupt();
     }
 
     connect();
@@ -266,18 +309,14 @@ public class Cli implements ICommandLine {
     System.out.println("\n--------- Sign up for Talx ---------\n");
 
     boolean allowedSymbols = true;
-
     JSONObject user = null;
 
     while (allowedSymbols) {
 
       user = prepareCredentionalData("NickName", "Username", "Email", "Password");
 
-      allowedSymbols = (
-
-      spc.matcher(((String) user.get("nickname"))).find() | spc.matcher(((String) user.get("username"))).find()
-
-      );
+      allowedSymbols = (spc.matcher(((String) user.get("nickname"))).find()
+          | spc.matcher(((String) user.get("username"))).find());
 
       if (allowedSymbols) {
         System.out.println("Forbidden characters are present in the \"NickName\" or \"Username\"");
@@ -306,8 +345,14 @@ public class Cli implements ICommandLine {
   private void enterToAccount() {
     if (connect.getStatus()) {
       if (!auth.enterToAccount()) {
-        System.out.println("Auth key not exist. Please login\n");
-        System.out.println("Type 11 or /help - for more information");
+        System.out.println("\n-- [Auth key not exist. Please login!] --\n");
+        String help = """
+            0. or /help - for more information
+            1. or /status - for get status
+            2. for login to account
+            3. for create account
+            """;
+        System.out.println(help + "\n");
       }
     }
   }
@@ -361,37 +406,27 @@ public class Cli implements ICommandLine {
 
     String[] help = {
 
-        " 1. /signin             - Authentication",
-
-        " 2. /sigup              - Authorization",
-
-        " 3. /status             - Сurrent status",
-
+        " 0. /help               - Help", //
+        " 1. /status             - Сurrent status", //
+        " 2. /signin             - Authentication", //
+        " 3. /sigup              - Authorization", //
         " 4. /connect            - Try connect to the server using last address:" + connect.getAddress().toString(),
-
         " 5. /connect <PORT>     - Try connect to the server using custom port",
-
-        " 6. /disconnect         - Disconnect from the Server",
-
-        " 7. /reconnect          - Reconnect to the Server",
-
-        " 8. /logout             - Logout from the user account",
-
-        " 9. /exit               - Exit from the Talx",
-
-        "10. /help               - Help",
+        " 6. /disconnect         - Disconnect from the Server", //
+        " 7. /reconnect          - Reconnect to the Server", //
+        " 8. /logout             - Logout from the user account", //
+        " 9. /exit               - Exit from the Talx", //
 
         "------------------------ Online options ------------------------",
 
-        "@<username> <message>   - Send private message for user",
-
-        "@all <message>          - Sand public message for all contacts",
-
-        "/online                 - Show online users",
-
-        "/read <username>        - read last 10 messages from <username>",
-
-        "/read <username> <num>  - read last <num> messages from <username>" };
+        "@<username> <message>   - Send private message for user", //
+        "@all <message>          - Sand public message for all contacts", //
+        "/online                 - Show online users", //
+        "/read <username>        - read last 10 messages from <username>", //
+        "/read <username> <num>  - read last <num> messages from <username>", //
+        "/edit <parameter>       - edit profile: nickname or password", //
+        "/delete                 - delete account",
+        "/whoami                 - about me" };
 
     for (String h : help) {
       System.out.println(h);

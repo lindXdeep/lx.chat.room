@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 
 import lx.talx.server.core.Server;
 import lx.talx.server.model.User;
+import lx.talx.server.model.UserBuilder;
 import lx.talx.server.service.*;
 import lx.talx.server.utils.Log;
 import lx.talx.server.utils.Util;
@@ -41,28 +42,32 @@ public class AuthProcessor {
         sendMail(user.getEmail(), "Request to authorize your Talx account",
             "We received a request to authorize your Talx account from IP: ".concat(server.getSocketAddr()));
 
-        return user.getAuthCode().concat(user.getPassword()).getBytes();
+        return user.getKey().getBytes();
       }
     }
     return new byte[0];
   }
 
   private byte[] authenticate(final User user) {
-    return user.getAuthCode().concat(user.getPassword()).getBytes();
+    return user.getKey().getBytes();
   }
 
   public byte[] create(JSONObject tmpUser, char[] authcode) {
+
+    User user = new User();
 
     if (userService.getUserByEmail((String) tmpUser.get("email")) == null
         & userService.getUserByUserName((String) tmpUser.get("username")) == null) {
 
       // add user in database
-      User user = new User();
-      user.setUserName((String) tmpUser.get("username"));
-      user.setEmail((String) tmpUser.get("email"));
-      user.setNickName((String) tmpUser.get("nickname"));
-      user.setAuthCode(String.valueOf(authcode));
-      user.setPassword(Util.toHash((String) tmpUser.get("password")));
+      user = new UserBuilder() //
+          .setUserName((String) tmpUser.get("username")) //
+          .setEmail((String) tmpUser.get("email")) //
+          .setNickName((String) tmpUser.get("nickname")) //
+          .setAuthCode(String.valueOf(authcode)) //
+          .setPassword(Util.toHash((String) tmpUser.get("password"))) //
+          .setKey(String.valueOf(authcode).concat(Util.toHash((String) tmpUser.get("password")))) //
+          .build();
 
       userService.add(user);
 
@@ -96,6 +101,18 @@ public class AuthProcessor {
     sb.append((String) tmpUser.get("nickname"));
     sb.append((String) tmpUser.get("email"));
     sb.append((String) tmpUser.get("password"));
+
+    return Long.toString(generateAuthCode(sb.toString())).toCharArray();
+  }
+
+  private char[] getAuthCode(User tmpUser) {
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append((String) tmpUser.getUserName());
+    sb.append((String) tmpUser.getNickName());
+    sb.append((String) tmpUser.getEmail());
+    sb.append((String) tmpUser.getPassword());
 
     return Long.toString(generateAuthCode(sb.toString())).toCharArray();
   }
@@ -168,5 +185,33 @@ public class AuthProcessor {
 
   public User getUserByUserName(String username) {
     return userService.getUserByUserName(username);
+  }
+
+  public User getUserIfPasswordValid(final String password) {
+
+    User user = userService.getUserByUserName(username);
+
+    if (username != null && user.getPassword().equals(Util.toHash(password)))
+      return user;
+    return null;
+  }
+
+  public void updateUser(final User user) {
+
+    // Send mail if update account
+    sendMail(user.getEmail(), "Your update registration in Talx",
+        "IP: ".concat(server.getSocketAddr() + "\n").concat("Login: ".concat(user.getUserName()) + "\n")
+            .concat("Password: ".concat((String) user.getPassword()) + "\n"));
+
+    user.setAuthCode(String.valueOf(getAuthCode(user)));
+    user.setPassword(Util.toHash(user.getPassword()));
+    user.setKey(user.getAuthCode().concat(user.getPassword()));
+
+    userService.update(user);
+  }
+
+  public void deleteAccount() {
+    userService.delete(getUserByUserName(username));
+    disable();
   }
 }

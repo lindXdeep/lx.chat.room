@@ -3,6 +3,14 @@ package lx.talx.server.core;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
+
+import lx.talx.server.model.User;
+import lx.talx.server.utils.Util;
+
 public class Controller {
 
   // regex pattern recipient user
@@ -38,7 +46,8 @@ public class Controller {
 
     } else if (msg.matches("^/online")) {
       server.getConnectionPool().executeSendUsersOnline(sender, msg);
-
+    } else if (msg.matches("^/whoami")) {
+      server.getConnectionPool().executeSendAboutMe(sender, msg);
     } else if (msg.matches("^/disconnect")) {
 
       sender = server.getAuthProcessor().getCurrentUserName();
@@ -48,6 +57,45 @@ public class Controller {
       server.getAuthProcessor().disable();
     } else if (msg.matches("^/ping")) {
       server.getConnectionPool().ping(sender);
+    } else if (msg.startsWith("/edit nickname")) {
+
+      JSONArray arr = (JSONArray) JSONValue.parse(msg.substring(14));
+
+      JSONObject param = (JSONObject) arr.get(0);
+      String oldNick = param.get("old nickname").toString();
+      String newNick = param.get("new nickname").toString();
+
+      String password = ((JSONObject) arr.get(1)).get("password").toString();
+      User user = server.getAuthProcessor().getUserIfPasswordValid(password);
+
+      if (user.getNickName().equals(oldNick)) {
+        user.setNickName(newNick);
+        server.getAuthProcessor().updateUser(user);
+      }
+    } else if (msg.startsWith("/edit password")) {
+
+      JSONArray arr = (JSONArray) JSONValue.parse(msg.substring(14));
+
+      JSONObject param = (JSONObject) arr.get(0);
+      String oldPass = param.get("old password").toString();
+      String newPass = param.get("new password").toString();
+
+      User user = server.getAuthProcessor().getUserIfPasswordValid(oldPass);
+
+      if (user != null) {
+        user.setPassword(newPass);
+        server.getAuthProcessor().updateUser(user);
+      }
+    } else if (msg.startsWith("/delete")) {
+
+      JSONObject pass = (JSONObject) JSONValue.parse(msg.substring(7));
+
+      User user = server.getAuthProcessor().getUserIfPasswordValid(pass.get("password").toString());
+
+      if (user != null) {
+        server.getAuthProcessor().deleteAccount();
+        processMessage("/disconnect");
+      }
     }
   }
 }

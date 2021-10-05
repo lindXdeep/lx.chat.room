@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.regex.*;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -50,6 +52,13 @@ public class MsgProcessor implements IMessageProcessor {
       System.out.print("\n" + recive.substring(7) + "\n\n::>");
     } else if (recive.startsWith("/ping")) {
       // ignore
+    }else if (recive.startsWith("/whoami")) {
+      JSONObject juser = (JSONObject) JSONValue.parse(recive.substring(7));
+      System.out.println("\n  ID:       " + juser.get("id"));
+      System.out.println("  Email:    " + juser.get("email"));
+      System.out.println("  Username: " + "@" + juser.get("username"));
+      System.out.println("  Nickname: " + juser.get("nickname"));
+      System.out.print("\n::>");
     }
   }
 

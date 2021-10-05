@@ -16,6 +16,7 @@
   - User accounts
   - Command processing
   - status brodcasting: online / offline
+  - sqlite data
 
 - client:
   - You can connect by choosing any port and address: `java -jar client.jar --connect 127.0.0.1 8181`.
@@ -36,6 +37,9 @@
     13. `/online `                - Show online users
     14. `/read <username>`        - read last 10 messages from `<username>`
     15. `/read <username> <num>`  - read last `<num>` messages from `<username>`
+    16. `/edit <parameter>`       - edit profile: `nickname` or `password`
+    17. `/whoami`                 - about me
+    17. `/delete`                 - delete account
   - Asymmetric message encryption
   - Data transfer secure protocol
   - Auto login after authentication

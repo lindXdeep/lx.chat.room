@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
+import lx.talx.server.model.User;
 import lx.talx.server.security.AuthProcessor;
 import lx.talx.server.utils.Log;
 
@@ -77,6 +79,19 @@ public class ConnectionPool {
 
   public void executeSendUsersOnline(String sender, String command) {
     sendResponse(sender, command, getAllUsers());
+  }
+
+  public void executeSendAboutMe(String sender, String command) {
+
+    User user = authProcessor.getUserByUserName(sender);
+
+    JSONObject juser = new JSONObject();
+    juser.put("id", user.getId());
+    juser.put("email", user.getEmail());
+    juser.put("username", user.getUserName());
+    juser.put("nickname", user.getNickName());
+
+    sendResponse(sender, command, juser.toJSONString());
   }
 
   private void sendResponse(String recipient, String command, String response) {

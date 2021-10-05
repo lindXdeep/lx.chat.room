@@ -3,12 +3,18 @@ package lx.talx.server.service;
 import java.util.List;
 
 import lx.talx.server.dao.IUserDao;
-import lx.talx.server.dao.UserDaoInMemory;
+import lx.talx.server.dao.UserDaoDataBase;
 import lx.talx.server.model.User;
 
 public class UserServiceImpl implements IUserService {
 
-  IUserDao userDao = new UserDaoInMemory();
+  private IUserDao userDao;
+
+  public UserServiceImpl() {
+
+    DataBaseService.loadProperties();
+    userDao = new UserDaoDataBase();
+  }
 
   @Override
   public void add(User user) {
@@ -37,7 +43,11 @@ public class UserServiceImpl implements IUserService {
 
   @Override
   public void delete(User user) {
-
+    userDao.delete(user);
   }
 
+  @Override
+  public void update(User user) {
+    userDao.update(user);
+  }
 }

@@ -78,7 +78,7 @@ public class UserDaoInMemory implements IUserDao {
 
     while (it.hasNext()) {
       User u = it.next().getValue();
-      if (u.getAuthCode().concat(u.getPassword()).equals(key)) {
+      if (u.getKey().equals(key)) {
         return u;
       }
     }

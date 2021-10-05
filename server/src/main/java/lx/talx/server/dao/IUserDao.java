@@ -16,4 +16,6 @@ public interface IUserDao {
   void delete(User user);
 
   User getUserByKey(String key);
+
+  void update(User user);
 }
