@@ -95,7 +95,6 @@ public class UserDaoDataBase implements IUserDao {
 
   @Override
   public User getUserByEmail(String email) {
-
     return selectFromUsers( //
         "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
             "FROM users WHERE email=?;", //
@@ -104,7 +103,16 @@ public class UserDaoDataBase implements IUserDao {
 
   @Override
   public void delete(User user) {
-    // TODO Auto-generated method stub
+
+    String sql = "DELETE FROM users WHERE id=?;";
+
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+      preparedStatement.setLong(1, user.getId());
+      preparedStatement.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -154,5 +162,27 @@ public class UserDaoDataBase implements IUserDao {
           .build();
     }
     return null;
+  }
+
+  @Override
+  public void update(User user) {
+
+    String sql = "UPDATE users SET email=?, password=?, auth_code=?, nick_name=?, key=? WHERE id=?;";
+
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+      preparedStatement.setString(1, user.getEmail());
+      preparedStatement.setString(2, user.getPassword());
+      preparedStatement.setString(3, user.getAuthCode());
+      preparedStatement.setString(4, user.getNickName());
+      preparedStatement.setString(5, user.getKey());
+
+      preparedStatement.setInt(6, user.getId());
+
+      preparedStatement.executeUpdate();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 }

@@ -174,4 +174,17 @@ public class AuthProcessor {
   public User getUserByUserName(String username) {
     return userService.getUserByUserName(username);
   }
+
+  public User getUserIfPasswordValid(final String password) {
+
+    User user = userService.getUserByUserName(username);
+
+    if (username != null && user.getPassword().equals(Util.toHash(password)))
+      return user;
+    return null;
+  }
+
+  public void updateUser(final User user) {
+    userService.update(user);
+  }
 }
