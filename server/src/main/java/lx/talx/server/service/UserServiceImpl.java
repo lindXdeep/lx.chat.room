@@ -10,19 +10,20 @@ import lx.talx.server.model.User;
 
 public class UserServiceImpl implements IUserService {
 
-  private IUserDao userDao;
+  private IUserDao userDao /* = new UserDaoInMemory() */;
 
   public UserServiceImpl() {
 
-    DataBaseService.loadProperties();
+     DataBaseService.loadProperties();
+     userDao = new UserDaoDataBase();
 
-    if (DataBaseService.connect) {
-      System.out.println("-- -- -- database");
-      userDao = new UserDaoDataBase();
-    } else {
-      System.out.println("== == == in memory");
-      userDao = new UserDaoInMemory();
-    }
+    // if (DataBaseService.connect) {
+    //   System.out.println("-- -- -- database");
+    //   userDao = new UserDaoDataBase();
+    // } else {
+    //   System.out.println("== == == in memory");
+    //   userDao = new UserDaoInMemory();
+    // }
   }
 
   @Override

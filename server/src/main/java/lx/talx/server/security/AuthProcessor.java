@@ -42,14 +42,14 @@ public class AuthProcessor {
         sendMail(user.getEmail(), "Request to authorize your Talx account",
             "We received a request to authorize your Talx account from IP: ".concat(server.getSocketAddr()));
 
-        return user.getAuthCode().concat(user.getPassword()).getBytes();
+        return user.getKey().getBytes();
       }
     }
     return new byte[0];
   }
 
   private byte[] authenticate(final User user) {
-    return user.getAuthCode().concat(user.getPassword()).getBytes();
+    return user.getKey().getBytes();
   }
 
   public byte[] create(JSONObject tmpUser, char[] authcode) {
@@ -66,6 +66,7 @@ public class AuthProcessor {
           .setNickName((String) tmpUser.get("nickname")) //
           .setAuthCode(String.valueOf(authcode)) //
           .setPassword(Util.toHash((String) tmpUser.get("password"))) //
+          .setKey(String.valueOf(authcode).concat(Util.toHash((String) tmpUser.get("password")))) //
           .build();
 
       userService.add(user);

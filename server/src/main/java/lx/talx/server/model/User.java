@@ -17,6 +17,8 @@ public class User implements Serializable {
 
   private String nickName;
 
+  private String key;
+
   public User() {
   }
 
@@ -27,6 +29,7 @@ public class User implements Serializable {
     this.password = userBuilder.getPassword();
     this.authCode = userBuilder.getAuthCode();
     this.nickName = userBuilder.getNickName();
+    this.key = userBuilder.getKey();
   }
 
   public int getId() {
@@ -77,6 +80,14 @@ public class User implements Serializable {
     this.authCode = authcode;
   }
 
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public String getKey() {
+    return key;
+  }
+
   @Override
   public int hashCode() {
 
@@ -87,6 +98,7 @@ public class User implements Serializable {
     hash *= 17 + authCode.hashCode();
     hash *= 17 + email.hashCode();
     hash *= 17 + password.hashCode();
+    hash *= 17 + key.hashCode();
 
     return hash;
   }
@@ -105,7 +117,8 @@ public class User implements Serializable {
         Objects.equals(this.nickName, user.nickName) && //
         this.authCode == user.authCode && //
         Objects.equals(this.email, user.email) && //
-        Objects.equals(this.password, user.password); //
+        Objects.equals(this.password, user.password) && //
+        Objects.equals(this.key, user.key); //
   }
 
   @Override
@@ -117,6 +130,7 @@ public class User implements Serializable {
         ", password='" + getPassword() + "'" + //
         ", authCode='" + getAuthCode() + "'" + //
         ", nickName='" + getNickName() + "'" + //
+        ", key='" + getKey() + "'" + //
         "}";
   }
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import lx.talx.server.model.User;
 import lx.talx.server.model.UserBuilder;
 import lx.talx.server.service.DataBaseService;
-import lx.talx.server.utils.*;
 
 public class UserDaoDataBase implements IUserDao {
 
@@ -36,7 +35,8 @@ public class UserDaoDataBase implements IUserDao {
           email     TEXT    NOT NULL,
           password  TEXT    NOT NULL,
           auth_code TEXT    NOT NULL,
-          nick_name TEXT    NOT NULL
+          nick_name TEXT    NOT NULL,
+          key       TEXT    NOT NULL
         );""";
 
     try {
@@ -59,8 +59,8 @@ public class UserDaoDataBase implements IUserDao {
   public void add(User user) {
 
     String sql = """
-        INSERT INTO users ('user_name', 'email', 'password', 'auth_code', 'nick_name')
-          VALUES(?,?,?,?,?);
+        INSERT INTO users (user_name, email, password, auth_code, nick_name, key)
+          VALUES(?,?,?,?,?,?);
         """;
 
     try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -70,6 +70,7 @@ public class UserDaoDataBase implements IUserDao {
       preparedStatement.setString(3, user.getPassword());
       preparedStatement.setString(4, user.getAuthCode());
       preparedStatement.setString(5, user.getNickName());
+      preparedStatement.setString(6, user.getKey());
 
       preparedStatement.executeUpdate();
 
@@ -87,7 +88,7 @@ public class UserDaoDataBase implements IUserDao {
   public User getUserByUserName(String username) {
 
     return selectFromUsers( //
-        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
+        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
             "FROM users WHERE user_name=?;", //
         username);
   }
@@ -96,7 +97,7 @@ public class UserDaoDataBase implements IUserDao {
   public User getUserByEmail(String email) {
 
     return selectFromUsers( //
-        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
+        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
             "FROM users WHERE email=?;", //
         email);
   }
@@ -110,13 +111,12 @@ public class UserDaoDataBase implements IUserDao {
   public User getUserByKey(String key) {
 
     String sql = //
-        "SELECT 'id', 'user_name', 'email', 'password', 'auth_code', 'nick_name'" + //
-            "FROM users WHERE auth_code=? AND password=?;";
+        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
+            "FROM users WHERE key=?;";
 
     try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-      preparedStatement.setString(1, key.substring(0, 16));
-      preparedStatement.setString(2, key.substring(16));
+      preparedStatement.setString(1, key);
 
       return resultSet(preparedStatement.executeQuery());
 
@@ -144,12 +144,13 @@ public class UserDaoDataBase implements IUserDao {
 
     if (resultSet.next()) {
       return new UserBuilder() //
-          .setId(resultSet.getInt("'id'")) //
-          .setUserName(resultSet.getString("'user_name'")) //
-          .setEmail(resultSet.getString("'email'")) //
-          .setPassword(resultSet.getString("'password'")) //
-          .setAuthCode(resultSet.getString("'auth_code'")) //
-          .setNickName(resultSet.getString("'nick_name'")) //
+          .setId(resultSet.getInt("id")) //
+          .setUserName(resultSet.getString("user_name")) //
+          .setEmail(resultSet.getString("email")) //
+          .setPassword(resultSet.getString("password")) //
+          .setAuthCode(resultSet.getString("auth_code")) //
+          .setNickName(resultSet.getString("nick_name")) //
+          .setKey(resultSet.getString("key")) //
           .build();
     }
     return null;

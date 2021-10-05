@@ -11,6 +11,8 @@ public class UserBuilder {
 
   private String nickName;
 
+  private String key;
+
   public UserBuilder setId(final int id) {
     this.id = id;
     return this;
@@ -41,6 +43,11 @@ public class UserBuilder {
     return this;
   }
 
+  public UserBuilder setKey(String key) {
+    this.key = key;
+    return this;
+  }
+
   public int getId() {
     return this.id;
   }
@@ -63,6 +70,10 @@ public class UserBuilder {
 
   public String getNickName() {
     return this.nickName;
+  }
+
+  public String getKey() {
+    return this.key;
   }
 
   public User build() {

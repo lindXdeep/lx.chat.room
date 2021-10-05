@@ -48,6 +48,12 @@ public class Controller {
       server.getAuthProcessor().disable();
     } else if (msg.matches("^/ping")) {
       server.getConnectionPool().ping(sender);
+    } else if (msg.matches("/edit nickname")) {
+
+        
     }
+
+
+     
   }
 }
