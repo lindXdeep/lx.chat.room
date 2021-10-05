@@ -113,13 +113,24 @@ public class Cli implements ICommandLine {
       read(command.concat(" " + 10));
     } else if (command.matches("^/edit\\s[a-zA-Z]{3,64}")) {
       edit(command);
-    } else if (command.matches("^/edit")) {
-      edit(command);
+    } else if (command.matches("^/delete")) {
+      delete(command);
+    } else if (command.matches("^/whoami")) {
+      whoami(command);
     } else {
       throw new WrongCommandException(command);
     }
-
     Util.printCursor();
+  }
+
+  private void whoami(String command) {
+
+  }
+
+  private void delete(String command) {
+    System.out.println("\nYou are going to permanently delete your account.\n");
+    JSONObject password = prepareCredentionalData("password");
+    connect.sendSecure(command.concat(password.toJSONString()).getBytes());
   }
 
   private void edit(String command) {
@@ -130,17 +141,7 @@ public class Cli implements ICommandLine {
 
     JSONArray update = new JSONArray();
 
-    if (param == null) {
-      JSONObject updatePass = getParamsForUpdate("password");
-      JSONObject updateNick = getParamsForUpdate("nickname");
-
-      update.clear();
-      update.add(updatePass);
-      update.add(updateNick);
-
-      connect.sendSecure(command.concat(update.toJSONString()).getBytes());
-
-    } else if (passParam != null || nickparam != null) {
+    if (passParam != null || nickparam != null) {
       update.clear();
 
       JSONObject updateParam = getParamsForUpdate(param);
@@ -345,9 +346,13 @@ public class Cli implements ICommandLine {
     if (connect.getStatus()) {
       if (!auth.enterToAccount()) {
         System.out.println("\n-- [Auth key not exist. Please login!] --\n");
-        System.out.println("Type 2 - if you have account or 3 for create it.\n");
-        System.out.println("Type 0 or /help - for more information");
-        System.out.println("Type 1 or /status - for get status");
+        String help = """
+            0. or /help - for more information
+            1. or /status - for get status
+            2. for login to account
+            3. for create account
+            """;
+        System.out.println(help + "\n");
       }
     }
   }
@@ -419,8 +424,9 @@ public class Cli implements ICommandLine {
         "/online                 - Show online users", //
         "/read <username>        - read last 10 messages from <username>", //
         "/read <username> <num>  - read last <num> messages from <username>", //
-        "/edit                   - edit profile: nickname and password", //
-        "/edit <parameter>       - edit profile: nickname or password" };
+        "/edit <parameter>       - edit profile: nickname or password", //
+        "/delete                 - delete account",
+        "/whoami                 - about me" };
 
     for (String h : help) {
       System.out.println(h);

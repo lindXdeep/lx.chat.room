@@ -36,8 +36,7 @@
     13. `/online `                - Show online users
     14. `/read <username>`        - read last 10 messages from `<username>`
     15. `/read <username> <num>`  - read last `<num>` messages from `<username>`
-    16. `/edit`                   - edit profile: `nickname` and `password`" };
-    17. `/edit <parameter>`       - edit profile: `nickname` or `password`" };
+    16. `/edit <parameter>`       - edit profile: `nickname` or `password`" };
   - Asymmetric message encryption
   - Data transfer secure protocol
   - Auto login after authentication

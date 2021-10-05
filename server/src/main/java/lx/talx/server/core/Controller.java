@@ -82,8 +82,18 @@ public class Controller {
       User user = server.getAuthProcessor().getUserIfPasswordValid(oldPass);
 
       if (user != null) {
-        user.setPassword(Util.toHash(newPass));
+        user.setPassword(newPass);
         server.getAuthProcessor().updateUser(user);
+      }
+    } else if (msg.startsWith("/delete")) {
+
+      JSONObject pass = (JSONObject) JSONValue.parse(msg.substring(7));
+
+      User user = server.getAuthProcessor().getUserIfPasswordValid(pass.get("password").toString());
+
+      if (user != null) {
+        server.getAuthProcessor().deleteAccount();
+        processMessage("/disconnect");
       }
     }
   }

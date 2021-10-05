@@ -198,9 +198,20 @@ public class AuthProcessor {
 
   public void updateUser(final User user) {
 
+    // Send mail if update account
+    sendMail(user.getEmail(), "Your update registration in Talx",
+        "IP: ".concat(server.getSocketAddr() + "\n").concat("Login: ".concat(user.getUserName()) + "\n")
+            .concat("Password: ".concat((String) user.getPassword()) + "\n"));
+
     user.setAuthCode(String.valueOf(getAuthCode(user)));
-    user.setKey(user.getAuthCode().concat(Util.toHash(user.getPassword())));
+    user.setPassword(Util.toHash(user.getPassword()));
+    user.setKey(user.getAuthCode().concat(user.getPassword()));
 
     userService.update(user);
+  }
+
+  public void deleteAccount() {
+    userService.delete(getUserByUserName(username));
+    disable();
   }
 }
