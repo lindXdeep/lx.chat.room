@@ -105,6 +105,18 @@ public class AuthProcessor {
     return Long.toString(generateAuthCode(sb.toString())).toCharArray();
   }
 
+  private char[] getAuthCode(User tmpUser) {
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append((String) tmpUser.getUserName());
+    sb.append((String) tmpUser.getNickName());
+    sb.append((String) tmpUser.getEmail());
+    sb.append((String) tmpUser.getPassword());
+
+    return Long.toString(generateAuthCode(sb.toString())).toCharArray();
+  }
+
   private long generateAuthCode(String string) {
     Random random = new Random();
     List<Long> dgt = new ArrayList<>();
@@ -185,6 +197,10 @@ public class AuthProcessor {
   }
 
   public void updateUser(final User user) {
+
+    user.setAuthCode(String.valueOf(getAuthCode(user)));
+    user.setKey(user.getAuthCode().concat(Util.toHash(user.getPassword())));
+
     userService.update(user);
   }
 }

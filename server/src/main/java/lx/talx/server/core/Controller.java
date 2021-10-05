@@ -9,6 +9,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import lx.talx.server.model.User;
+import lx.talx.server.utils.Util;
 
 public class Controller {
 
@@ -78,7 +79,12 @@ public class Controller {
       String oldPass = param.get("old password").toString();
       String newPass = param.get("new password").toString();
 
-    }
+      User user = server.getAuthProcessor().getUserIfPasswordValid(oldPass);
 
+      if (user != null) {
+        user.setPassword(Util.toHash(newPass));
+        server.getAuthProcessor().updateUser(user);
+      }
+    }
   }
 }
