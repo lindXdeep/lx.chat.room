@@ -2,10 +2,12 @@ package lx.talx.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,20 +39,38 @@ public class Cli implements ICommandLine {
 
   private Matcher m;
 
-  // regex pattern recipient user
-  private Pattern pUser = Pattern.compile("^@[a-zA-Z]{0,64}\\s");
-  private Pattern pMsg = Pattern.compile("\\s.{0,4096}");
+  private Pattern pUser;   // regex pattern recipient user
+  private Pattern pMsg;
+  private Pattern spc; // regex pattern for special symbols
+  private Pattern ptr; // regex pattern for email RFC822 compliant right format
 
-  // regex pattern for special symbols
-  private Pattern spc = Pattern.compile("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
-
-  // regex pattern for email RFC822 compliant right format
-  private Pattern ptr = Pattern.compile(
-      "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+  private Properties c = new Properties();
+  private Properties p = new Properties();
 
   public Cli(Connect connect) {
     this.connect = connect;
     this.auth = connect.getAuth();
+
+    try (InputStream in_comm = Cli.class.getClassLoader().getResourceAsStream("command.properties");
+        InputStream in_prop = getClass().getClassLoader().getResourceAsStream("patterns.properties")) {
+
+      if (in_comm == null || in_prop == null) {
+        System.out.println("Sorry, unable to find properties");
+        return;
+      }
+
+      c.load(in_comm);
+      p.load(in_prop);
+
+    } catch (IOException e) {
+      Log.error("Error in property file");
+    }
+
+    pUser = Pattern.compile(p.getProperty("pUser")); // regex pattern recipient user
+    pMsg = Pattern.compile(p.getProperty("pMsg"));
+    spc = Pattern.compile(p.getProperty("spc")); // regex pattern for special symbols
+    ptr = Pattern.compile(p.getProperty("ptr")); // regex pattern for email RFC822 compliant right format
+
     console();
   }
 
@@ -75,51 +95,52 @@ public class Cli implements ICommandLine {
   @Override
   public void execute(String command) throws WrongCommandException {
 
-    if (command.matches("^/help") || command.matches("^0")) {
-      help();
-    } else if (command.matches("^/status") || command.matches("^1")) {
+    if (command.matches(c.getProperty("help")) || command.matches("^0")) {
+      System.out.printf("\n" + p.getProperty("help") + "\n", connect.getAddress().toString());
+    } else if (command.matches(c.getProperty("status")) || command.matches("^1")) {
       status();
-    } else if (command.matches("^/signin") || command.matches("^2")) {
+    } else if (command.matches(c.getProperty("signin")) || command.matches("^2")) {
       if (connect.getStatus() & !auth.isLoginStatus()) {
         auth();
       } else {
         status();
       }
-    } else if (command.matches("^/signup") || command.matches("^3")) {
+    } else if (command.matches(c.getProperty("signup")) || command.matches("^3")) {
       if (auth.isLoginStatus()) {
         logout();
         connect();
       }
       signup();
-    } else if (command.matches("^/connect") || command.matches("^4")) {
+    } else if (command.matches(c.getProperty("connect_def")) || command.matches("^4")) {
       connect();
-    } else if (command.matches("^/connect\\s\\d{2,5}") || command.matches("^5\\s\\d{2,5}")) {
+    } else if (command.matches(c.getProperty("connect_port")) || command.matches("^5\\s\\d{2,5}")) {
       connect(Integer.parseInt(command.split("\\s")[1]));
-    } else if (command.matches("^/disconnect") || command.matches("^6")) {
+    } else if (command.matches(c.getProperty("disconnect")) || command.matches("^6")) {
       disconnect();
-    } else if (command.matches("^/reconnect") || command.matches("^7")) {
+    } else if (command.matches(c.getProperty("reconnect")) || command.matches("^7")) {
       reconnect();
-    } else if (command.matches("^/logout") || command.matches("^8")) {
+    } else if (command.matches(c.getProperty("logout")) || command.matches("^8")) {
       logout();
-    } else if (command.matches("^/exit") || command.matches("^9")) {
+    } else if (command.matches(c.getProperty("exit")) || command.matches("^9")) {
       exit();
-    } else if (command.matches("^@[a-zA-Z]{3,64}\\s.{0,4096}")) {
+    } else if (command.matches(c.getProperty("snd_usr_msg"))) {
       sendMessage(command);
-    } else if (command.matches("^/online")) {
+    } else if (command.matches(c.getProperty("online"))) {
       online();
-    } else if (command.matches("^/read\\s@[a-zA-Z]{3,64}\\s\\d{1,4}")) {
+    } else if (command.matches(c.getProperty("read_msg_user_num"))) {
       read(command);
-    } else if (command.matches("^/read\\s@[a-zA-Z]{3,64}")) {
+    } else if (command.matches(c.getProperty("read_msg_user_all"))) {
       read(command.concat(" " + 10));
-    } else if (command.matches("^/edit\\s[a-zA-Z]{3,64}")) {
+    } else if (command.matches(c.getProperty("edit"))) {
       edit(command);
-    } else if (command.matches("^/delete")) {
+    } else if (command.matches(c.getProperty("delete"))) {
       delete(command);
-    } else if (command.matches("^/whoami")) {
+    } else if (command.matches(c.getProperty("whoami"))) {
       whoami(command);
     } else {
       throw new WrongCommandException(command);
     }
+
     Util.printCursor();
   }
 
@@ -152,8 +173,7 @@ public class Cli implements ICommandLine {
 
       connect.sendSecure(command.concat(update.toJSONString()).getBytes());
     } else {
-      System.out.println("\nParameter: \'" + command.substring(6) + "\' - is not exist");
-      System.out.println("Type 0 or /help - for more information");
+      System.out.printf(p.getProperty("note_param"), command.substring(6));
     }
   }
 
@@ -345,14 +365,7 @@ public class Cli implements ICommandLine {
   private void enterToAccount() {
     if (connect.getStatus()) {
       if (!auth.enterToAccount()) {
-        System.out.println("\n-- [Auth key not exist. Please login!] --\n");
-        String help = """
-            0. or /help - for more information
-            1. or /status - for get status
-            2. for login to account
-            3. for create account
-            """;
-        System.out.println(help + "\n");
+        System.out.println(p.getProperty("note"));
       }
     }
   }
@@ -400,37 +413,6 @@ public class Cli implements ICommandLine {
       System.out.println(e.getMessage());
     }
     return str.getBytes();
-  }
-
-  private void help() {
-
-    String[] help = {
-
-        " 0. /help               - Help", //
-        " 1. /status             - Сurrent status", //
-        " 2. /signin             - Authentication", //
-        " 3. /sigup              - Authorization", //
-        " 4. /connect            - Try connect to the server using last address:" + connect.getAddress().toString(),
-        " 5. /connect <PORT>     - Try connect to the server using custom port",
-        " 6. /disconnect         - Disconnect from the Server", //
-        " 7. /reconnect          - Reconnect to the Server", //
-        " 8. /logout             - Logout from the user account", //
-        " 9. /exit               - Exit from the Talx", //
-
-        "------------------------ Online options ------------------------",
-
-        "@<username> <message>   - Send private message for user", //
-        "@all <message>          - Sand public message for all contacts", //
-        "/online                 - Show online users", //
-        "/read <username>        - read last 10 messages from <username>", //
-        "/read <username> <num>  - read last <num> messages from <username>", //
-        "/edit <parameter>       - edit profile: nickname or password", //
-        "/delete                 - delete account",
-        "/whoami                 - about me" };
-
-    for (String h : help) {
-      System.out.println(h);
-    }
   }
 
   private void writeForRecipient(String user, String message) {
