@@ -1,5 +1,7 @@
 package lx.talx.server.dao;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,6 +18,14 @@ public class UserDaoDataBase implements IUserDao {
   private Connection connection;
   private Statement statement;
 
+  private String sqlCreateTable;
+  private String sqlAddUser;
+  private String sqlDeleteUser;
+  private String sqlGetUserByKey;
+  private String sqlUpdateUsers;
+  private String sqlSelectWhereUsername;
+  private String sqlSelectWhereEmail;
+
   public UserDaoDataBase() {
 
     try {
@@ -23,31 +33,35 @@ public class UserDaoDataBase implements IUserDao {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+
+    try {
+
+      ClassLoader loader = this.getClass().getClassLoader();
+
+      sqlCreateTable = new String(loader.getResourceAsStream("sql/sqlCreateTableUsers.sql").readAllBytes());
+      sqlAddUser = new String(loader.getResourceAsStream("sql/sqlAddUser.sql").readAllBytes());
+      sqlDeleteUser = new String(loader.getResourceAsStream("sql/sqlDeleteUser.sql").readAllBytes());
+      sqlGetUserByKey = new String(loader.getResourceAsStream("sql/sqlGetUserByKey.sql").readAllBytes());
+      sqlUpdateUsers = new String(loader.getResourceAsStream("sql/sqlUpdateUsers.sql").readAllBytes());
+      sqlSelectWhereUsername = new String(loader.getResourceAsStream("sql/sqlSelectWhereUsername.sql").readAllBytes());
+      sqlSelectWhereEmail = new String(loader.getResourceAsStream("sql/sqlSelectWhereEmail.sql").readAllBytes());
+
+    } catch (IOException e3) {
+      e3.printStackTrace();
+    }
+
     createUserTable();
   }
 
   private void createUserTable() {
 
-    String sql = """
-        CREATE TABLE IF NOT EXISTS users (
-          id        INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          user_name TEXT    NOT NULL,
-          email     TEXT    NOT NULL,
-          password  TEXT    NOT NULL,
-          auth_code TEXT    NOT NULL,
-          nick_name TEXT    NOT NULL,
-          key       TEXT    NOT NULL
-        );""";
-
     try {
-      connection.setAutoCommit(false);
       statement = connection.createStatement();
-      statement.executeUpdate(sql);
+      statement.executeUpdate(sqlCreateTable);
     } catch (SQLException e1) {
       e1.printStackTrace();
     } finally {
       try {
-        connection.setAutoCommit(true);
         statement.close();
       } catch (SQLException e2) {
         e2.printStackTrace();
@@ -58,12 +72,7 @@ public class UserDaoDataBase implements IUserDao {
   @Override
   public void add(User user) {
 
-    String sql = """
-        INSERT INTO users (user_name, email, password, auth_code, nick_name, key)
-          VALUES(?,?,?,?,?,?);
-        """;
-
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlAddUser)) {
 
       preparedStatement.setString(1, user.getUserName());
       preparedStatement.setString(2, user.getEmail());
@@ -86,28 +95,18 @@ public class UserDaoDataBase implements IUserDao {
 
   @Override
   public User getUserByUserName(String username) {
-
-    return selectFromUsers( //
-        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
-            "FROM users WHERE user_name=?;", //
-        username);
+    return selectFromUsers(sqlSelectWhereUsername, username);
   }
 
   @Override
   public User getUserByEmail(String email) {
-    return selectFromUsers( //
-        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
-            "FROM users WHERE email=?;", //
-        email);
+    return selectFromUsers(sqlSelectWhereEmail, email);
   }
 
   @Override
   public void delete(User user) {
 
-    String sql = "DELETE FROM users WHERE id=?;";
-
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteUser)) {
       preparedStatement.setLong(1, user.getId());
       preparedStatement.executeUpdate();
     } catch (SQLException e) {
@@ -118,20 +117,12 @@ public class UserDaoDataBase implements IUserDao {
   @Override
   public User getUserByKey(String key) {
 
-    String sql = //
-        "SELECT id, user_name, email, password, auth_code, nick_name, key " + //
-            "FROM users WHERE key=?;";
-
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlGetUserByKey)) {
       preparedStatement.setString(1, key);
-
       return resultSet(preparedStatement.executeQuery());
-
     } catch (SQLException e) {
       e.printStackTrace();
     }
-
     return null;
   }
 
@@ -141,7 +132,6 @@ public class UserDaoDataBase implements IUserDao {
 
       preparedStatement.setString(1, where);
       return resultSet(preparedStatement.executeQuery());
-
     } catch (SQLException e2) {
       e2.printStackTrace();
     }
@@ -167,9 +157,7 @@ public class UserDaoDataBase implements IUserDao {
   @Override
   public void update(User user) {
 
-    String sql = "UPDATE users SET email=?, password=?, auth_code=?, nick_name=?, key=? WHERE id=?;";
-
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdateUsers)) {
 
       preparedStatement.setString(1, user.getEmail());
       preparedStatement.setString(2, user.getPassword());
