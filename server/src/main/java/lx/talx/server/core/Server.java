@@ -3,6 +3,9 @@ package lx.talx.server.core;
 import java.io.IOException;
 import java.net.*;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import lx.talx.server.security.AuthProcessor;
 import lx.talx.server.utils.*;
@@ -34,7 +37,10 @@ public class Server extends Thread {
           Log.info("Waiting connections...");
           socket = serverSocket.accept();
           Log.info("Client" + Util.getAddress(socket) + "connected!");
-          new Connection(socket, this).start();
+
+          ExecutorService executorService = Executors.newFixedThreadPool(100);
+          executorService.submit(new Connection(socket, this));
+          executorService.shutdown();
         }
       } catch (BindException e) {
         this.PORT = Util.getFreePort();
