@@ -24,7 +24,6 @@ public class App {
         Log.info("Unable to find mail.properties");
         return;
       }
-      
       properties = new Properties();
       properties.load(input);
 

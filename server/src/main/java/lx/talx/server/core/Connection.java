@@ -14,7 +14,7 @@ import lx.talx.server.security.CryptProtocol;
 import lx.talx.server.utils.Log;
 import lx.talx.server.utils.Util;
 
-public class Connection extends Thread {
+public class Connection implements Runnable {
 
   private byte[] buffer;
   private int defBufSeze = 13107200; // 100 MegaBit // 12,5 MB // default
