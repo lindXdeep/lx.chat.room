@@ -2,15 +2,16 @@ package lx.talx.server.utils;
 
 import java.net.Socket;
 
+import static lx.talx.server.utils.Util.getLogger;
 public class Log {
 
   private static boolean chprnt;
 
   public static void info(String string) {
     if (!chprnt) {
-      System.out.println("\n-> start.\n\t│\n\t├── " + string + "\n\t│");
+      System.out.println("\n-> start.\n\t │\n\t ├── " + string + "\n\t  │");
     } else {
-      System.out.println("\t├── " + string + "\n\t│");
+      getLogger().info(string);
     }
     chprnt = true;
   }
@@ -32,7 +33,7 @@ public class Log {
   }
 
   public static void error(String error) {
-    info(error);
+    getLogger().error(error);
   }
 
   public static void status(String user, String status) {

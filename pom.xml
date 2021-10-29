@@ -20,6 +20,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
+
+    <log4j-core>2.14.1</log4j-core>
+
   </properties>
 
   <dependencies>
@@ -55,7 +58,21 @@
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
       <version>3.36.0</version>
-    </dependency>                             
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j-core}</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j-core}</version>
+    </dependency>
 
   </dependencies>
 
@@ -87,6 +104,7 @@
                   <filtering>true</filtering>
                   <includes>
                     <include>**/*.properties</include>
+                    <include>**/*.xml</include>
                   </includes>
                 </resource>
 
